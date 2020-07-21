@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class Asteroid : MonoBehaviour
 {
+    public GameObject explosionEffect;
     // Start is called before the first frame update
     void Start()
     {
@@ -14,5 +15,27 @@ public class Asteroid : MonoBehaviour
     void Update()
     {
         if (transform.position.x < -10) Destroy(gameObject);
+    }
+
+    private void OnCollisionEnter(Collision collision)
+    {
+        if (collision.gameObject.tag == "Player")
+        {
+            Renderer[] renderers = GetComponentsInChildren<Renderer>();
+            foreach (var r in renderers)
+            {
+                r.enabled = false; 
+            }
+            GameObject explosion = GameObject.Instantiate(explosionEffect, transform.position, Quaternion.identity);
+            GameObject.Destroy(explosion, 3);
+        }
+    }
+
+    private void OnCollisionExit(Collision collision)
+    {
+        if (collision.gameObject.tag == "Player")
+        {
+            GameObject.Destroy(gameObject);
+        }
     }
 }
