@@ -6,10 +6,8 @@ using UnityEngine;
 public class FPV_CAM : MonoBehaviour
 {
     WebCamTexture webcamTexture;
-    //RenderTexture renderTexture;
     public Camera cam;
     public Material mat;
-    //public Shader shader;
     Texture2D distortMap;
     double _CX = 315.467;
     double _CY = 240.9649;
@@ -75,11 +73,6 @@ public class FPV_CAM : MonoBehaviour
         distortMap.Apply(false);
         mat.SetTexture("_DistortTex", distortMap);
 
-        //renderTexture = new RenderTexture(Screen.width, Screen.height, 24, RenderTextureFormat.ARGB32);
-        //cam.targetTexture = renderTexture;
-        //cam.forceIntoRenderTexture = true;
-
-        //cam.SetReplacementShader(shader, "");
         WebCamDevice[] webCams = WebCamTexture.devices;
         foreach (WebCamDevice webCam in webCams)
         {
@@ -94,42 +87,8 @@ public class FPV_CAM : MonoBehaviour
         }
     }
 
-    // Update is called once per frame
-    /*void Update()
-    {
-        
-    }*/
-
-    void OnPreRender()
-    {
-        //cam.targetTexture = renderTexture;
-        //cam.forceIntoRenderTexture = true;
-        //Graphics.Blit(webcamTexture, null as RenderTexture);
-    }
-
-    private void OnDestroy()
-    {
-        //renderTexture.Release();
-    }
-
     void OnRenderImage(RenderTexture source, RenderTexture destination)
     {
-        //Debug.Log(source.format+""+destination.format);
-        //Debug.Log("OnRenderImage");
-        //Graphics.Blit(webcamTexture, null as RenderTexture);
         Graphics.Blit(source, destination, mat);
-        //Graphics.Blit(source, destination);
-        //Graphics.DrawTexture(new Rect(0, 0, Screen.width, Screen.height), source, mat, -1);
-        //cam.targetTexture = null;
-        //Graphics.Blit(destination, null as RenderTexture);
     }
-
-    //void OnPostRender()
-    //{
-        //Debug.Log("OnPostRender");
-        //Graphics.Blit(webcamTexture, renderTexture);
-        //Graphics.DrawTexture(new Rect(10, 10, 100, 100), webcamTexture);
-        //cam.targetTexture = null;
-        //Debug.Log("haha");
-    //}
 }

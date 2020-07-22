@@ -31,8 +31,9 @@ public class DroneAct : MonoBehaviour
         Vector2 heading2d = new Vector2(heading.x, heading.z);
         float angle = -Vector2.SignedAngle(heading2d,  impact2d); //https://forum.unity.com/threads/vector2-signedangle.507058/
         if (angle < 0) angle += 360f;
-        Debug.Log(angle.ToString("F4"));
+        //Debug.Log(angle.ToString("F4"));
         avoidAngle = (byte)(angle / 2f);
+        Debug.Log("avoid angle:" + avoidAngle);
         SendDistSensor(5, avoidAngle);
     }
 
