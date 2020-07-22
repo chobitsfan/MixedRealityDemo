@@ -23,7 +23,7 @@ public class GameStage : MonoBehaviour
         if (play)
         {
             ts += Time.deltaTime;
-            if (ts > 1)
+            if (ts > 0.5)
             {
                 ts = 0;
                 GameObject asteroid = GameObject.Instantiate(asteroidType[Random.Range(0, 2)], new Vector3(5, Random.Range(0f, 4f), Random.Range(-4f, 4f)), Quaternion.identity);
