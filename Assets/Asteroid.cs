@@ -27,7 +27,7 @@ public class Asteroid : MonoBehaviour
                 r.enabled = false; 
             }
             GameObject explosion = GameObject.Instantiate(explosionEffect, transform.position, Quaternion.identity);
-            GameObject.Destroy(explosion, 3);
+            GameObject.Destroy(explosion, 1);
         }
     }
 

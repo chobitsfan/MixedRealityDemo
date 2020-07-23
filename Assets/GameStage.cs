@@ -27,7 +27,7 @@ public class GameStage : MonoBehaviour
             {
                 ts = 0;
                 GameObject asteroid = GameObject.Instantiate(asteroidType[Random.Range(0, 2)], new Vector3(5, Random.Range(0f, 4f), Random.Range(-4f, 4f)), Quaternion.identity);
-                asteroid.GetComponent<Rigidbody>().AddForce(new Vector3(-1, 0, 0) * Random.Range(2f, 10f), ForceMode.VelocityChange);
+                asteroid.GetComponent<Rigidbody>().AddForce(new Vector3(-1, 0, 0) * Random.Range(2f, 5f), ForceMode.VelocityChange);
             }
         }
     }

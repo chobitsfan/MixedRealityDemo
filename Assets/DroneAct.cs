@@ -3,9 +3,11 @@ using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class DroneAct : MonoBehaviour
 {
+    public Text msg;
     MAVLink.MavlinkParse mavlinkParse = new MAVLink.MavlinkParse();
     byte avoidAngle = 0;
     Socket mavSock = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
@@ -32,9 +34,10 @@ public class DroneAct : MonoBehaviour
         float angle = -Vector2.SignedAngle(heading2d,  impact2d); //https://forum.unity.com/threads/vector2-signedangle.507058/
         if (angle < 0) angle += 360f;
         //Debug.Log(angle.ToString("F4"));
-        avoidAngle = (byte)(angle / 2f);
-        Debug.Log("avoid angle:" + avoidAngle);
+        avoidAngle = (byte)(angle / 2f);        
         SendDistSensor(5, avoidAngle);
+        Debug.Log("avoid angle:" + avoidAngle);
+        msg.text = "hit " + avoidAngle;
     }
 
     private void OnCollisionStay(Collision collision)
@@ -42,7 +45,7 @@ public class DroneAct : MonoBehaviour
         SendDistSensor(5, avoidAngle);
     }
 
-    private void SendDistSensor(byte dist, byte orientation)
+    private void SendDistSensor(ushort dist, byte orientation)
     {
         MAVLink.mavlink_distance_sensor_t msg = new MAVLink.mavlink_distance_sensor_t
         {
