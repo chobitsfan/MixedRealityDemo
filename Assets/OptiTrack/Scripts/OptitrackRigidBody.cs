@@ -10,7 +10,8 @@ public class OptitrackRigidBody : MonoBehaviour
 {
     public OptitrackStreamingClient StreamingClient;
     public Int32 RigidBodyId;
-
+    [System.NonSerialized]
+    public bool updated = false;
 
     void Start()
     {
@@ -61,8 +62,20 @@ public class OptitrackRigidBody : MonoBehaviour
         OptitrackRigidBodyState rbState = StreamingClient.GetLatestRigidBodyState( RigidBodyId );
         if ( rbState != null )
         {
-            this.transform.localPosition = rbState.Pose.Position;
-            this.transform.localRotation = rbState.Pose.Orientation;
+            if (rbState.DeliveryTimestamp.AgeSeconds > 0.05)
+            {
+                if (updated)
+                {
+                    Debug.Log("no data from optitrack");
+                }
+                updated = false;
+            }
+            else
+            {
+                this.transform.localPosition = rbState.Pose.Position;
+                this.transform.localRotation = rbState.Pose.Orientation;
+                updated = true;
+            }
         }
     }
 }

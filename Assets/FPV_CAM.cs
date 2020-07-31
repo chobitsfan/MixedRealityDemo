@@ -24,7 +24,8 @@ public class FPV_CAM : MonoBehaviour
     {
         int camWidth = 640;
         int camHeight = 480;
-        Debug.Log(Screen.width + "x" + Screen.height + ":" + SystemInfo.SupportsTextureFormat(TextureFormat.RGFloat));
+        //Debug.Log(Screen.width + "x" + Screen.height + ":" + SystemInfo.SupportsTextureFormat(TextureFormat.RGFloat));
+        Debug.Log(SystemInfo.SupportsTextureFormat(TextureFormat.RGFloat) ? "RGFloat supported" : "RGFloat not supported");
         int width = Screen.width;
         int height = Screen.height;
         distortMap = new Texture2D(width, height, TextureFormat.RGFloat, false, true);
