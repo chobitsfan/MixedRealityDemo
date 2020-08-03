@@ -16,6 +16,7 @@
             CGPROGRAM
             #pragma vertex vert
             #pragma fragment frag
+            #define DISTORT
 
             #include "UnityCG.cginc"
 
@@ -45,8 +46,12 @@
 
             fixed4 frag(v2f i) : SV_Target
             {
+#ifdef DISTORT
                 float4 data = tex2D(_DistortTex, i.uv);
                 float4 col = tex2D(_MainTex, float2(data.x,data.y));
+#else
+                float4 col = tex2D(_MainTex, i.uv);
+#endif
                 return col * col.a + tex2D(_CamTex, i.uv) * (1 - col.a);
             }
             ENDCG
