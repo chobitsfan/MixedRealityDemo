@@ -8,38 +8,35 @@ public class FPV_CAM : MonoBehaviour
     WebCamTexture webcamTexture;
     public Camera cam;
     public Material mat;
-    Texture2D distortMap;
-    double _CX = 315.467;
-    double _CY = 240.9649;
-    double _FX = 246.8864;
-    double _FY = 249.7506;
-    double _K1 = 0.21874;
-    double _K2 = -0.24239;
-    double _P1 = -0.00089613;
-    double _P2 = 0.00064407;
-    double _K3 = 0.063342;
+    Texture2D distortMap;    
 
     // Start is called before the first frame update
     void Start()
     {
+        double _CX = 315.46700339723378;
+        double _CY = 240.96490293217204;
+        double _FX = 246.88640535269982;
+        double _FY = 249.75063383890236;
+        double _K1 = 0.21874107025134129;
+        double _K2 = -0.24239137352267334;
+        double _P1 = -0.00089613800498784054;
+        double _P2 = 0.00064407518211666542;
+        double _K3 = 0.063342985246817154;
         int camWidth = 640;
         int camHeight = 480;
-        //Debug.Log(Screen.width + "x" + Screen.height + ":" + SystemInfo.SupportsTextureFormat(TextureFormat.RGFloat));
         Debug.Log(SystemInfo.SupportsTextureFormat(TextureFormat.RGFloat) ? "RGFloat supported" : "RGFloat not supported");
-        int width = Screen.width;
-        int height = Screen.height;
-        distortMap = new Texture2D(width, height, TextureFormat.RGFloat, false, true);
+        distortMap = new Texture2D(camWidth, camHeight, TextureFormat.RGFloat, false, true);
         distortMap.filterMode = FilterMode.Point;
         distortMap.anisoLevel = 1;
         distortMap.wrapMode = TextureWrapMode.Clamp;
-        float[] distortData = new float[width * height * 2];
+        float[] distortData = new float[camWidth * camHeight * 2];
         for (int i = 0; i < distortData.Length; i++)
         {
             distortData[i] = -1;
         }
-        for (double i = 0; i < camHeight; i+=0.5)
+        for (float i = 0; i <= camHeight; i += 0.5f)
         {
-            for (double j = 0; j < camWidth; j+=0.5)
+            for (float j = 0; j <= camWidth; j += 0.5f)
             {
                 double x = (j - _CX) / _FX;
                 double y = (i - _CY) / _FY;
@@ -51,25 +48,23 @@ public class FPV_CAM : MonoBehaviour
                 y_distort += (_P1 * (r2 + 2 * y * y) + 2 * _P2 * x * y);
                 x_distort = x_distort * _FX + _CX;
                 y_distort = y_distort * _FY + _CY;
-                //Debug.Log(x_distort + "," + y_distort);
-                int idxU = (int)Math.Round(x_distort / camWidth * width);
-                int idxV = (int)Math.Round(y_distort / camHeight * height);
-                if (idxU >=0 && idxV>=0 && idxU < width && idxV < height)
+                int mapIdx = (int)Math.Round(y_distort) * camWidth * 2 + (int)Math.Round(x_distort) * 2; //TextureFormat.RGFloat -> 2 elements (u,v) per pixel
+                if (mapIdx >= 0 && mapIdx + 1 < distortData.Length)
                 {
-                    int mapIdx = idxV * width * 2 + idxU * 2;
-                    //Debug.Log(mapIdx);
-                    distortData[mapIdx] = (float)j / camWidth;
-                    distortData[mapIdx + 1] = (float)i / camHeight;
+                    distortData[mapIdx] = j / camWidth;
+                    distortData[mapIdx + 1] = i / camHeight;
                 }
             }
         }
-        /*for (int i = 0; i < distortData.Length; i++)
+        int count = 0;
+        for (int i = 0; i < distortData.Length; i++)
         {
             if (distortData[i] < 0)
             {
-                distortData[i] = distortData[i - 1];
+                count++;
             }
-        }*/
+        }
+        Debug.Log("unfilled:" + count);
         distortMap.SetPixelData(distortData, 0);
         distortMap.Apply(false);
         mat.SetTexture("_DistortTex", distortMap);
