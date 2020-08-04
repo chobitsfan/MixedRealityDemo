@@ -25,7 +25,7 @@ public class DroneData : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (!rigidBody.updated)
+        if (!rigidBody.updated && gotAtt && gotPos)
         {
             transform.localPosition = pos;
             transform.localRotation = att;
