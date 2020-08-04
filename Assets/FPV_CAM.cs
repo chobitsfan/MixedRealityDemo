@@ -48,14 +48,16 @@ public class FPV_CAM : MonoBehaviour
                 y_distort += (_P1 * (r2 + 2 * y * y) + 2 * _P2 * x * y);
                 x_distort = x_distort * _FX + _CX;
                 y_distort = y_distort * _FY + _CY;
-                int mapIdx = (int)Math.Round(y_distort) * camWidth * 2 + (int)Math.Round(x_distort) * 2; //TextureFormat.RGFloat -> 2 elements (u,v) per pixel
-                if (mapIdx >= 0 && mapIdx + 1 < distortData.Length)
+                int j_distort = (int)Math.Round(x_distort);
+                int i_distort = (int)Math.Round(y_distort);
+                if (i_distort >= 0 && j_distort >= 0 && i_distort < camHeight && j_distort < camWidth)
                 {
-                    distortData[mapIdx] = j / camWidth;
-                    distortData[mapIdx + 1] = i / camHeight;
+                    int idx = i_distort * camWidth * 2 + j_distort * 2; //TextureFormat.RGFloat -> 2 elements (u,v) per pixel
+                    distortData[idx] = j / camWidth;
+                    distortData[idx + 1] = i / camHeight;
                 }
             }
-        }
+        }        
         int count = 0;
         for (int i = 0; i < distortData.Length; i++)
         {
