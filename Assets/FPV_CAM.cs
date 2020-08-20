@@ -27,7 +27,7 @@ public class FPV_CAM : MonoBehaviour
         Debug.Log(SystemInfo.SupportsTextureFormat(TextureFormat.RGFloat) ? "RGFloat supported" : "RGFloat not supported");
         distortMap = new Texture2D(camWidth, camHeight, TextureFormat.RGFloat, false, true);
         distortMap.filterMode = FilterMode.Bilinear;
-        distortMap.anisoLevel = 1;
+        distortMap.anisoLevel = 2;
         distortMap.wrapMode = TextureWrapMode.Clamp;
         float[] distortData = new float[camWidth * camHeight * 2];
         for (int i = 0; i < distortData.Length; i++)
@@ -66,7 +66,7 @@ public class FPV_CAM : MonoBehaviour
                 count++;
             }
         }
-        Debug.Log("unfilled:" + count / 2);
+        Debug.Log("unfilled cell:" + count / 2);
         distortMap.SetPixelData(distortData, 0);
         distortMap.Apply(false);
         mat.SetTexture("_DistortTex", distortMap);
