@@ -5,10 +5,10 @@ using UnityEngine;
 
 public class FPV_CAM : MonoBehaviour
 {
-    WebCamTexture webcamTexture;
-    public Camera cam;
+    WebCamTexture webcamTexture;    
     public Material mat;
-    Texture2D distortMap;    
+    Texture2D distortMap;
+    Camera cam;
 
     // Start is called before the first frame update
     void Start()
@@ -83,6 +83,8 @@ public class FPV_CAM : MonoBehaviour
                 break;
             }
         }
+
+        cam = GetComponent<Camera>();
     }
 
     void OnRenderImage(RenderTexture source, RenderTexture destination)
