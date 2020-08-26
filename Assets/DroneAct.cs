@@ -45,10 +45,16 @@ public class DroneAct : MonoBehaviour
         SendDistSensor(5, avoidAngle);
     }
 
+    private void OnCollisionExit(Collision collision)
+    {
+        SendDistSensor(5, avoidAngle);
+    }
+
     private void SendDistSensor(ushort dist, byte orientation)
     {
         MAVLink.mavlink_distance_sensor_t msg = new MAVLink.mavlink_distance_sensor_t
         {
+            type = 10,
             min_distance = 1,
             max_distance = 300,
             current_distance = dist,
