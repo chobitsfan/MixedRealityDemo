@@ -4,14 +4,22 @@ using UnityEngine;
 
 public class AAGun : MonoBehaviour
 {
-    public GameObject bullet;
-    public GameObject player;
-    float ts = 0;
+    public GameObject bullet;    
+    public GameObject gunStand;
+    public GameObject gunBarrel;
+    public GameObject shootPoint;
+    public GameObject fireFx;
+    GameObject player = null;
+    float ts = 3f;
     bool play = false;
     // Start is called before the first frame update
     void Start()
     {
-        
+        if (player == null)
+        {
+            player = GameObject.FindGameObjectWithTag("Player");
+        }
+        ts = Random.Range(1f, 3f);
     }
 
     // Update is called once per frame
@@ -23,13 +31,16 @@ public class AAGun : MonoBehaviour
         }
         if (play)
         {
-            ts += Time.deltaTime;
-            if (ts > 3)
+            ts -= Time.deltaTime;
+            if (ts < 0)
             {
-                ts = 0;
-                GameObject bb = GameObject.Instantiate(bullet, transform.position, Quaternion.identity);
+                ts = Random.Range(1f, 3f);
+                GameObject bb = GameObject.Instantiate(bullet, shootPoint.transform.position, Quaternion.LookRotation(player.transform.position - transform.position));
                 bb.GetComponent<Rigidbody>().AddForce((player.transform.position - transform.position).normalized * 3, ForceMode.VelocityChange);
+                fireFx.GetComponent<ParticleSystem>().Play();
             }
         }
+        gunStand.transform.LookAt(new Vector3(player.transform.position.x, 0, player.transform.position.z));
+        gunBarrel.transform.LookAt(player.transform);
     }
 }

@@ -5,6 +5,7 @@ using UnityEngine;
 public class Asteroid : MonoBehaviour
 {
     public GameObject explosionEffect;
+    float endTs = 5;
     // Start is called before the first frame update
     void Start()
     {
@@ -14,12 +15,18 @@ public class Asteroid : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (transform.position.x < -10) Destroy(gameObject);
+        endTs -= Time.deltaTime;
+        if (endTs < 0)
+        {
+            GameObject.Destroy(gameObject);
+            GameObject explosion = GameObject.Instantiate(explosionEffect, transform.position, Quaternion.identity);
+            GameObject.Destroy(explosion, 1);
+        }
     }
 
     private void OnCollisionEnter(Collision collision)
     {
-        if (collision.gameObject.tag == "Player")
+        if (collision.gameObject.CompareTag("Player"))
         {
             Renderer[] renderers = GetComponentsInChildren<Renderer>();
             foreach (var r in renderers)
@@ -33,7 +40,7 @@ public class Asteroid : MonoBehaviour
 
     private void OnCollisionExit(Collision collision)
     {
-        if (collision.gameObject.tag == "Player")
+        if (collision.gameObject.CompareTag("Player"))
         {
             GameObject.Destroy(gameObject);
         }
