@@ -5,11 +5,12 @@ using UnityEngine;
 public class Asteroid : MonoBehaviour
 {
     public GameObject explosionEffect;
+    GameStage stage;
     float endTs = 5;
     // Start is called before the first frame update
     void Start()
     {
-        
+        stage = GameObject.FindGameObjectWithTag("Stage").GetComponent<GameStage>();
     }
 
     // Update is called once per frame
@@ -21,6 +22,18 @@ public class Asteroid : MonoBehaviour
             GameObject.Destroy(gameObject);
             GameObject explosion = GameObject.Instantiate(explosionEffect, transform.position, Quaternion.identity);
             GameObject.Destroy(explosion, 1);
+        }
+    }
+
+    private void FixedUpdate()
+    {
+        if (Physics.Raycast(transform.position, transform.forward, 1))
+        {
+            stage.Warning();
+        }
+        else
+        {
+            stage.Warning(false);
         }
     }
 
@@ -43,6 +56,7 @@ public class Asteroid : MonoBehaviour
         if (collision.gameObject.CompareTag("Player"))
         {
             GameObject.Destroy(gameObject);
+            stage.Warning(false);
         }
     }
 }

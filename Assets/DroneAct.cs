@@ -54,7 +54,7 @@ public class DroneAct : MonoBehaviour
     {
         MAVLink.mavlink_distance_sensor_t msg = new MAVLink.mavlink_distance_sensor_t
         {
-            type = 10,
+            type = 10, //shock
             min_distance = 1,
             max_distance = 300,
             current_distance = dist,

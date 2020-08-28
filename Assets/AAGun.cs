@@ -19,7 +19,7 @@ public class AAGun : MonoBehaviour
         {
             player = GameObject.FindGameObjectWithTag("Player");
         }
-        ts = Random.Range(1f, 3f);
+        ts = Random.Range(2f, 4f);
     }
 
     // Update is called once per frame
@@ -34,9 +34,9 @@ public class AAGun : MonoBehaviour
             ts -= Time.deltaTime;
             if (ts < 0)
             {
-                ts = Random.Range(1f, 3f);
+                ts = Random.Range(2f, 4f);
                 GameObject bb = GameObject.Instantiate(bullet, shootPoint.transform.position, Quaternion.LookRotation(player.transform.position - transform.position));
-                bb.GetComponent<Rigidbody>().AddForce((player.transform.position - transform.position).normalized * 3, ForceMode.VelocityChange);
+                bb.GetComponent<Rigidbody>().AddForce((player.transform.position - transform.position).normalized, ForceMode.VelocityChange);
                 fireFx.GetComponent<ParticleSystem>().Play();
             }
         }

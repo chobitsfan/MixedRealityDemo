@@ -5,16 +5,17 @@ using UnityEngine;
 
 public class GameStage : MonoBehaviour
 {
-    public GameObject[] asteroidType = new GameObject[3];
-    float ts = 0;
-    bool play = false;
+    public GameObject emergency;
+    //public GameObject[] asteroidType = new GameObject[3];
+    //float ts = 0;
+    //bool play = false;
     // Start is called before the first frame update
     void Start()
     {
     }
 
     // Update is called once per frame
-    void Update()
+    /*void Update()
     {
         if (Input.GetKeyDown(KeyCode.Space))
         {
@@ -30,5 +31,10 @@ public class GameStage : MonoBehaviour
                 asteroid.GetComponent<Rigidbody>().AddForce(new Vector3(-1, 0, 0) * Random.Range(2f, 5f), ForceMode.VelocityChange);
             }
         }
+    }*/
+
+    public void Warning(bool warning = true)
+    {
+        emergency.SetActive(warning);
     }
 }

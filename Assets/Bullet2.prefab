@@ -125,3 +125,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   explosionEffect: {fileID: 1337198075554910, guid: 25c7aa9ad705fe143a4d71c1c8deb7d4,
     type: 3}
+  stage: {fileID: 5108700588383897507, guid: b85702d2b22866e4fb7c9652904e2217, type: 3}
