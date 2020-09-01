@@ -13,11 +13,9 @@ public class DroneData : MonoBehaviour
     bool gotAtt = false;
     Vector3 pos = Vector3.zero;
     Quaternion att = Quaternion.identity;
-    OptitrackRigidBody rigidBody;
     // Start is called before the first frame update
     void Start()
     {
-        rigidBody = gameObject.GetComponent<OptitrackRigidBody>();
         thread = new Thread(new ThreadStart(RecvData));
         thread.Start();
     }
@@ -25,7 +23,7 @@ public class DroneData : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (!rigidBody.updated && gotAtt && gotPos)
+        if (gotAtt && gotPos)
         {
             transform.localPosition = pos;
             transform.localRotation = att;
@@ -74,7 +72,7 @@ public class DroneData : MonoBehaviour
                                 target_system = 0,
                                 command = (ushort)MAVLink.MAV_CMD.SET_MESSAGE_INTERVAL,
                                 param1 = (float)MAVLink.MAVLINK_MSG_ID.LOCAL_POSITION_NED,
-                                param2 = 100000
+                                param2 = 20000
                             };
                             byte[] data = mavlinkParse.GenerateMAVLinkPacket10(MAVLink.MAVLINK_MSG_ID.COMMAND_LONG, msgOut);
                             sock.SendTo(data, myGCS);
@@ -86,7 +84,7 @@ public class DroneData : MonoBehaviour
                                 target_system = 0,
                                 command = (ushort)MAVLink.MAV_CMD.SET_MESSAGE_INTERVAL,
                                 param1 = (float)MAVLink.MAVLINK_MSG_ID.ATTITUDE_QUATERNION,
-                                param2 = 100000
+                                param2 = 20000
                             };
                             byte[] data = mavlinkParse.GenerateMAVLinkPacket10(MAVLink.MAVLINK_MSG_ID.COMMAND_LONG, msgOut);
                             sock.SendTo(data, myGCS);

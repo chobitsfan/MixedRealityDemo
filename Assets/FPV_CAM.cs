@@ -170,6 +170,6 @@ public class FPV_CAM : MonoBehaviour
         Debug.Log("VplayerUnityframeReader OnDestroy");
         NPlayer_Uninit(ptr);
         ptr = IntPtr.Zero;
-        releaseVideoFrameBuffer();
+        if (bStart) releaseVideoFrameBuffer();
     }
 }
