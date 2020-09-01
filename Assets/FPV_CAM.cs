@@ -1,29 +1,55 @@
 ﻿using System;
+using System.Runtime.InteropServices;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class FPV_CAM : MonoBehaviour
 {
-    WebCamTexture webcamTexture;    
+    [DllImport("vplayerUnity.dll")]
+    public static extern IntPtr NPlayer_Init();
+    [DllImport("vplayerUnity.dll")]
+    public static extern int NPlayer_Connect(IntPtr pPlayer, string url, int mode);
+    [DllImport("vplayerUnity.dll")]
+    public static extern int NPlayer_GetWidth(IntPtr pPlayer);
+    [DllImport("vplayerUnity.dll")]
+    public static extern int NPlayer_GetHeight(IntPtr pPlayer);
+    [DllImport("vplayerUnity.dll")]
+    public static extern int NPlayer_Uninit(IntPtr pPlayer);
+    [DllImport("vplayerUnity.dll")]
+    public static extern int NPlayer_ReadFrame(IntPtr pPlayer, IntPtr buffer, out UInt64 timestamp);
+
     public Material mat;
     Texture2D distortMap;
-    Camera cam;
+
+    IntPtr ptr;
+    bool bStart;
+    Texture2D texY;
+    Texture2D texU;
+    Texture2D texV;
+    int w, h;    
+    byte[] buffer;
+    protected IntPtr unmanagedBuffer;
 
     // Start is called before the first frame update
     void Start()
     {
-        double _CX = 315.46700339723378;
-        double _CY = 240.96490293217204;
-        double _FX = 246.88640535269982;
-        double _FY = 249.75063383890236;
-        double _K1 = 0.21874107025134129;
-        double _K2 = -0.24239137352267334;
-        double _P1 = -0.00089613800498784054;
-        double _P2 = 0.00064407518211666542;
-        double _K3 = 0.063342985246817154;
-        int camWidth = 640;
-        int camHeight = 480;
+        ptr = IntPtr.Zero;
+        ptr = NPlayer_Init();
+        NPlayer_Connect(ptr, "rtsp://192.168.50.13/v1/", 1);
+        bStart = false;
+#if DISTORT
+        double _CX = 6.395 * 100;
+        double _CY = 3.595 * 100;
+        double _FX = 1.2936588953959019 * 1000;
+        double _FY = 1.2936588953959019 * 1000;
+        double _K1 = 3.9125784966932795 * 0.01;
+        double _K2 = 7.6818881727080013 * 0.1;
+        double _P1 = 0;
+        double _P2 = 0;
+        double _K3 = -3.238587127227778;
+        int camWidth = 1280;
+        int camHeight = 720;
         Debug.Log(SystemInfo.SupportsTextureFormat(TextureFormat.RGFloat) ? "RGFloat supported" : "RGFloat not supported");
         distortMap = new Texture2D(camWidth, camHeight, TextureFormat.RGFloat, false, true);
         distortMap.filterMode = FilterMode.Bilinear;
@@ -70,25 +96,80 @@ public class FPV_CAM : MonoBehaviour
         distortMap.SetPixelData(distortData, 0);
         distortMap.Apply(false);
         mat.SetTexture("_DistortTex", distortMap);
-
-        WebCamDevice[] webCams = WebCamTexture.devices;
-        foreach (WebCamDevice webCam in webCams)
-        {
-            if (webCam.name.StartsWith("USB2.0"))
-            {
-                Debug.Log("background camera:" + webCam.name);
-                webcamTexture = new WebCamTexture(webCam.name);
-                webcamTexture.Play();
-                mat.SetTexture("_CamTex", webcamTexture);
-                break;
-            }
-        }
-
-        cam = GetComponent<Camera>();
+#endif
     }
 
     void OnRenderImage(RenderTexture source, RenderTexture destination)
     {
         Graphics.Blit(source, destination, mat);
+    }
+
+    void initVideoFrameBuffer()
+    {
+        w = NPlayer_GetWidth(ptr);
+        h = NPlayer_GetHeight(ptr);
+        if (w != 0 && h != 0)
+        {
+            Debug.Log("width = " + w + ", height = " + h);
+            int frameLen = w * h * 3;
+            Debug.Log("frameLen = " + frameLen);
+            buffer = new byte[frameLen];
+            unmanagedBuffer = Marshal.AllocHGlobal(frameLen);
+
+            bStart = true;
+
+            texY = new Texture2D(w, h, TextureFormat.Alpha8, false);
+            //U分量和V分量分別存放在兩張貼圖中
+            texU = new Texture2D(w >> 1, h >> 1, TextureFormat.Alpha8, false);
+            texV = new Texture2D(w >> 1, h >> 1, TextureFormat.Alpha8, false);
+            mat.SetTexture("_YTex", texY);
+            mat.SetTexture("_UTex", texU);
+            mat.SetTexture("_VTex", texV);
+        }
+    }
+
+    void releaseVideoFrameBuffer()
+    {
+        if (unmanagedBuffer == IntPtr.Zero)
+            Marshal.FreeHGlobal(unmanagedBuffer);
+    }
+
+    void getVideoFameBuffer()
+    {
+        UInt64 timestamp;
+        int frameLen = NPlayer_ReadFrame(ptr, unmanagedBuffer, out timestamp);
+        Marshal.Copy(unmanagedBuffer, buffer, 0, frameLen);
+
+        int Ycount = w * h;
+        int UVcount = w * (h >> 2);
+        texY.SetPixelData(buffer, 0, 0);
+        texY.Apply();
+        texU.SetPixelData(buffer, 0, Ycount);
+        texU.Apply();
+        texV.SetPixelData(buffer, 0, Ycount + UVcount);
+        texV.Apply();
+    }
+
+    void Update()
+    {
+        if (!bStart)
+        {
+            //Debug.Log("initVideoFrameBuffer");
+            initVideoFrameBuffer();
+        }
+        else
+        {
+            //Debug.Log("getVideoFameBuffer");
+            getVideoFameBuffer();
+        }
+    }
+
+    private void OnDestroy()
+    {
+        //renderTexture.Release();
+        Debug.Log("VplayerUnityframeReader OnDestroy");
+        NPlayer_Uninit(ptr);
+        ptr = IntPtr.Zero;
+        releaseVideoFrameBuffer();
     }
 }
