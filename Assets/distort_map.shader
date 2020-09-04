@@ -18,7 +18,7 @@
             CGPROGRAM
             #pragma vertex vert
             #pragma fragment frag
-            //#define DISTORT
+            #define DISTORT
 
             #include "UnityCG.cginc"
 

@@ -40,7 +40,7 @@ public class AAGun : MonoBehaviour
                 fireFx.GetComponent<ParticleSystem>().Play();
             }
         }
-        gunStand.transform.LookAt(new Vector3(player.transform.position.x, 0, player.transform.position.z));
-        gunBarrel.transform.LookAt(player.transform);
+        //gunStand.transform.LookAt(new Vector3(player.transform.position.x, 0, player.transform.position.z));
+        //gunBarrel.transform.LookAt(player.transform);
     }
 }

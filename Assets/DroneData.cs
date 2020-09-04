@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
@@ -39,18 +40,19 @@ public class DroneData : MonoBehaviour
 
     void RecvData()
     {
-        IPEndPoint myGCS = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 17500);
+        IPEndPoint sender = new IPEndPoint(IPAddress.Any, 0);
+        EndPoint myGCS = (EndPoint)sender;
         byte[] buf = new byte[MAVLink.MAVLINK_MAX_PACKET_LEN];
         MAVLink.MavlinkParse mavlinkParse = new MAVLink.MavlinkParse();
         Socket sock = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
         sock.ReceiveTimeout = 1000;
-        sock.Bind(new IPEndPoint(IPAddress.Loopback, 17501));
+        sock.Bind(new IPEndPoint(IPAddress.Any, 17500));
         while (gogo)
         {
             int recvBytes = 0;
             try
             {
-                recvBytes = sock.Receive(buf);
+                recvBytes = sock.ReceiveFrom(buf, ref myGCS);
             }
             catch (SocketException)
             {
