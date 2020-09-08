@@ -14,6 +14,7 @@ public class DroneData : MonoBehaviour
     bool gotAtt = false;
     Vector3 pos = Vector3.zero;
     Quaternion att = Quaternion.identity;
+    long recv_intvl = 0;
     // Start is called before the first frame update
     void Start()
     {
@@ -28,6 +29,15 @@ public class DroneData : MonoBehaviour
         {
             transform.localPosition = pos;
             transform.localRotation = att;
+            /*if (recv_intvl > 0)
+            {
+                Debug.Log("recv_intvl " + recv_intvl);
+                recv_intvl = 0;
+            }
+            else
+            {
+                Debug.Log("no update");
+            }*/
         }
     }
 
@@ -40,6 +50,9 @@ public class DroneData : MonoBehaviour
 
     void RecvData()
     {
+        //System.Diagnostics.Stopwatch stopwatch = new System.Diagnostics.Stopwatch();
+        //stopwatch.Start();
+        //long recv_ts = 0;
         IPEndPoint sender = new IPEndPoint(IPAddress.Any, 0);
         EndPoint myGCS = (EndPoint)sender;
         byte[] buf = new byte[MAVLink.MAVLINK_MAX_PACKET_LEN];
@@ -102,6 +115,8 @@ public class DroneData : MonoBehaviour
                         var data = (MAVLink.mavlink_local_position_ned_t)msg.data;
                         pos = new Vector3(-data.x, -data.z, data.y);
                         //Debug.Log("recv local_position_ned " + pos.ToString("F4"));
+                        //recv_intvl = stopwatch.ElapsedMilliseconds - recv_ts;
+                        //recv_ts = stopwatch.ElapsedMilliseconds;
                     }
                     else if (msg_type == typeof(MAVLink.mavlink_attitude_quaternion_t))
                     {
@@ -116,5 +131,6 @@ public class DroneData : MonoBehaviour
                 }
             }
         }
+        //stopwatch.Stop();
     }
 }
