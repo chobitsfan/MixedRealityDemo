@@ -8,6 +8,7 @@ using UnityEngine;
 
 public class DroneData : MonoBehaviour
 {
+    public int MAVLinkPort;
     Thread thread;
     bool gogo = true;
     bool gotPos = false;
@@ -25,6 +26,11 @@ public class DroneData : MonoBehaviour
         thread = new Thread(new ThreadStart(RecvData));
         thread.Start();
         rb = GetComponent<Rigidbody>();
+    }
+
+    private void Reset()
+    {
+        MAVLinkPort = 17500;
     }
 
     private void FixedUpdate()
@@ -80,7 +86,7 @@ public class DroneData : MonoBehaviour
         MAVLink.MavlinkParse mavlinkParse = new MAVLink.MavlinkParse();
         Socket sock = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
         sock.ReceiveTimeout = 1000;
-        sock.Bind(new IPEndPoint(IPAddress.Any, 17500));
+        sock.Bind(new IPEndPoint(IPAddress.Any, MAVLinkPort));
         while (gogo)
         {
             int recvBytes = 0;

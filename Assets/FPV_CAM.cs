@@ -22,10 +22,12 @@ public class FPV_CAM : MonoBehaviour
     public static extern int NPlayer_ReadFrame(IntPtr pPlayer, IntPtr buffer, out UInt64 timestamp);
 
     public Material mat;
+    public bool ConnectCamera;
+
     Texture2D distortMap;
 
-    IntPtr ptr;
-    bool bStart;
+    IntPtr ptr = IntPtr.Zero;
+    bool bStart = false;
     Texture2D texY;
     Texture2D texU;
     Texture2D texV;
@@ -38,7 +40,7 @@ public class FPV_CAM : MonoBehaviour
     {
         ptr = IntPtr.Zero;
         ptr = NPlayer_Init();
-        NPlayer_Connect(ptr, "rtsp://192.168.1.247/v1/", 1);
+        if (ConnectCamera) NPlayer_Connect(ptr, "rtsp://192.168.1.247/v1/", 1);
         bStart = false;
 #if DISTORT
         double _CX = 6.395 * 100;
@@ -154,24 +156,31 @@ public class FPV_CAM : MonoBehaviour
 
     void Update()
     {
-        if (!bStart)
+        if (ConnectCamera)
         {
-            //Debug.Log("initVideoFrameBuffer");
-            initVideoFrameBuffer();
-        }
-        else
-        {
-            //Debug.Log("getVideoFameBuffer");
-            getVideoFameBuffer();
+            if (bStart)
+            {
+                //Debug.Log("getVideoFameBuffer");
+                getVideoFameBuffer();
+            }
+            else
+            {
+                //Debug.Log("initVideoFrameBuffer");
+                initVideoFrameBuffer();
+            }
         }
     }
 
     private void OnDestroy()
     {
-        //renderTexture.Release();
-        Debug.Log("VplayerUnityframeReader OnDestroy");
+        //Debug.Log("VplayerUnityframeReader OnDestroy");
         NPlayer_Uninit(ptr);
         ptr = IntPtr.Zero;
         if (bStart) releaseVideoFrameBuffer();
+    }
+
+    private void Reset()
+    {
+        ConnectCamera = true;
     }
 }
