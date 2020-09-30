@@ -32,7 +32,7 @@ public class EmeryControl : MonoBehaviour
                 GameObject missile = GameObject.Instantiate(Missile, transform.position - transform.up * 0.1f, Quaternion.LookRotation(transform.forward));
                 SparseDesign.ControlledFlight.MissileSupervisor missileSupervisor = missile.GetComponent<SparseDesign.ControlledFlight.MissileSupervisor>();
                 missileSupervisor.m_guidanceSettings.m_target = player;
-                //missile.GetComponent<Rigidbody>().AddForce(-transform.up * 0.5f, ForceMode.VelocityChange);
+                //missile.GetComponent<Rigidbody>().AddForce(-transform.up * 0.2f, ForceMode.VelocityChange);
                 //missileSupervisor.StartLaunchSequence();
                 missileLoaded = false;
             }

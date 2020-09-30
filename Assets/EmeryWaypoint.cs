@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class EmeryWaypoint : MonoBehaviour
 {
+    public GameObject LocalWaypoint;
     GameObject player;
     GameObject emery;
     bool near = false;
@@ -37,13 +38,15 @@ public class EmeryWaypoint : MonoBehaviour
             {
                 near = false;
                 Vector2 pos = Random.insideUnitCircle * 4;
-                transform.localPosition = new Vector3(-12, pos.y, pos.x);
+                LocalWaypoint.transform.localPosition = new Vector3(-15, pos.y, pos.x);
+                transform.position = LocalWaypoint.transform.position;
             }
             else
             {
                 near = true;
                 Vector2 pos = Random.insideUnitCircle * 0.5f;
-                transform.localPosition = new Vector3(-2, pos.y, pos.x);
+                LocalWaypoint.transform.localPosition = new Vector3(-2, pos.y, pos.x);
+                transform.position = LocalWaypoint.transform.position;
             }
         }
     }

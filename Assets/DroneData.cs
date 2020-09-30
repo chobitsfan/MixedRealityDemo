@@ -9,10 +9,12 @@ using UnityEngine;
 public class DroneData : MonoBehaviour
 {
     public int MAVLinkPort;
+    public GameObject Gun;
     Thread thread;
     bool gogo = true;
     bool gotPos = false;
     bool gotAtt = false;
+    bool gotRC = false;
     bool newPos = false;
     bool newAtt = false;
     Vector3 pos = Vector3.zero;
@@ -20,6 +22,9 @@ public class DroneData : MonoBehaviour
     //long recv_intvl = 0;
     Rigidbody rb;
     bool got_hb = false;
+    bool shoot = false;
+    bool shooting = false;
+    //float shootingTs = 1f;
     // Start is called before the first frame update
     void Start()
     {
@@ -44,6 +49,22 @@ public class DroneData : MonoBehaviour
         {
             newAtt = false;
             rb.MoveRotation(att);
+        }
+        if (shoot && !shooting)
+        {
+            shooting = true;
+            Gun.GetComponent<ParticleSystem>().Play();
+            /*shootingTs -= Time.fixedDeltaTime;
+            if (shootingTs < 0)
+            {
+                shootingTs = 1f;
+                GameObject.Instantiate(Bolt, transform.position - transform.up * 0.2f, Quaternion.LookRotation(-transform.right));
+            }*/
+        }
+        else if (!shoot && shooting)
+        {
+            shooting = false;
+            Gun.GetComponent<ParticleSystem>().Stop();
         }
     }
 
@@ -110,7 +131,19 @@ public class DroneData : MonoBehaviour
                         if (!got_hb)
                         {
                             got_hb = true;
-                            Debug.Log("got heartbeat");
+                            Debug.Log("heartbeat received");
+                        }
+                        if (!gotRC)
+                        {
+                            MAVLink.mavlink_command_long_t msgOut = new MAVLink.mavlink_command_long_t()
+                            {
+                                target_system = 0,
+                                command = (ushort)MAVLink.MAV_CMD.SET_MESSAGE_INTERVAL,
+                                param1 = (float)MAVLink.MAVLINK_MSG_ID.RC_CHANNELS_RAW,
+                                param2 = 50000
+                            };
+                            byte[] data = mavlinkParse.GenerateMAVLinkPacket10(MAVLink.MAVLINK_MSG_ID.COMMAND_LONG, msgOut);
+                            sock.SendTo(data, myGCS);
                         }
                         if (!gotPos)
                         {
@@ -161,6 +194,24 @@ public class DroneData : MonoBehaviour
                         newAtt = true;
                         var data = (MAVLink.mavlink_attitude_quaternion_t)msg.data;
                         att = new Quaternion(-data.q2, -data.q4, data.q3, -data.q1);
+                    }
+                    else if (msg_type == typeof(MAVLink.mavlink_rc_channels_raw_t))
+                    {
+                        if (!gotRC)
+                        {
+                            gotRC = true;
+                            Debug.Log("rc_channels_raw received");
+                        }
+                        var data = (MAVLink.mavlink_rc_channels_raw_t)msg.data;
+                        if (data.chan6_raw > 1600)
+                        {
+                            shoot = true;
+                            //Debug.Log("fire");
+                        }
+                        else
+                        {
+                            shoot = false;
+                        }
                     }
                 }
             }

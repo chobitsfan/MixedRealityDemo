@@ -24,6 +24,7 @@ namespace SparseDesign
             bool m_showLaunchAndThrust = true;
 
             private MissileSupervisor m_missileSupervisor = default;
+            SerializedProperty m_guidSettingsProp;
 
             private void OnEnable()
             {
@@ -32,8 +33,8 @@ namespace SparseDesign
                     m_missileSupervisor = (MissileSupervisor)target;
                 }
 
-                SerializedProperty guidSettingsProp = serializedObject.FindProperty("m_guidanceSettings");
-                m_pathObjsProp = guidSettingsProp.FindPropertyRelative("m_pathObjs");
+                m_guidSettingsProp = serializedObject.FindProperty("m_guidanceSettings");
+                m_pathObjsProp = m_guidSettingsProp.FindPropertyRelative("m_pathObjs");
 
                 m_motorSettingsProp = serializedObject.FindProperty("m_motorStages");
 
@@ -50,9 +51,8 @@ namespace SparseDesign
 
                 EditorGUI.BeginChangeCheck();
 
-                guidanceSettings.m_targetType = (MissileGuidance.TargetType)EditorGUILayout.EnumPopup(new GUIContent(
-                    "Target Type",
-                    "[m_guidanceSettings.m_targetType]"), guidanceSettings.m_targetType);
+                EditorGUILayout.PropertyField(m_guidSettingsProp.FindPropertyRelative("m_targetType"),
+                    new GUIContent("Target Type", "[m_guidanceSettings.m_targetType]"));
 
                 bool isTarget = guidanceSettings.m_targetType == MissileGuidance.TargetType.TARGET;
                 bool isPath = guidanceSettings.m_targetType == MissileGuidance.TargetType.PATH;
@@ -62,13 +62,11 @@ namespace SparseDesign
                 switch (guidanceSettings.m_targetType)
                 {
                     case MissileGuidance.TargetType.TARGET:
-                        guidanceSettings.m_target = (GameObject)EditorGUILayout.ObjectField(new GUIContent("Target", "Gameobject to intercept.\nThe object does not need to contain a Rigidbody but it will typically work better, especially at higher target speeds.\n[m_guidanceSettings.m_target]"), guidanceSettings.m_target, typeof(GameObject), true);
+                        EditorGUILayout.PropertyField(m_guidSettingsProp.FindPropertyRelative("m_target"), new GUIContent("Target", "Gameobject to intercept.\nThe object does not need to contain a Rigidbody but it will typically work better, especially at higher target speeds.\n[m_guidanceSettings.m_target]"));
                         break;
                     case MissileGuidance.TargetType.PATH:
                         EditorGUILayout.PropertyField(m_pathObjsProp, new GUIContent("Path Objects", "Objects used as waypoints in the path.\n[m_guidanceSettings.m_pathObjs]"));
-
-                        guidanceSettings.m_loopPath = EditorGUILayout.Toggle(new GUIContent("Loop path", "Repeat path by continuing from last waypoint to first. [m_guidanceSettings.m_loopPath]"), guidanceSettings.m_loopPath);
-
+                        EditorGUILayout.PropertyField(m_guidSettingsProp.FindPropertyRelative("m_loopPath"), new GUIContent("Loop path", "Repeat path by continuing from last waypoint to first. [m_guidanceSettings.m_loopPath]"));
                         break;
                 }
                 EditorGUI.indentLevel--;
@@ -82,22 +80,20 @@ namespace SparseDesign
 
                     if (isTarget) GUILayout.Label(new GUIContent("Algorithm: PROPORTIONALNAVIGATION", "Can be changed in the full version of Controlled Flight."));
 
-                    if (isTarget) guidanceSettings.m_N = EditorGUILayout.Slider(new GUIContent("Navigation Constant", "See https://en.wikipedia.org/wiki/Proportional_navigation .\n[m_guidanceSettings.m_N]"), guidanceSettings.m_N, 2f, 20f);
+                    if (isTarget) EditorGUILayout.PropertyField(m_guidSettingsProp.FindPropertyRelative("m_N"), new GUIContent("Navigation Constant", "See https://en.wikipedia.org/wiki/Proportional_navigation .\n[m_guidanceSettings.m_N]"));
 
                     if (isPath)
                     {
-                        guidanceSettings.m_tTurnIn = EditorGUILayout.FloatField(
-                            new GUIContent("Time to path",
+                        EditorGUILayout.PropertyField(m_guidSettingsProp.FindPropertyRelative("m_tTurnIn"), new GUIContent("Time to path",
                             "The approximate time required to turn into the path or line of sight.\nSmall value means fast convergence to the path.\n" +
-                            "Too small a value might create instability.\n[m_guidanceSettings.m_tTurnIn]"),
-                            guidanceSettings.m_tTurnIn);
+                            "Too small a value might create instability.\n[m_guidanceSettings.m_tTurnIn]"));
                         guidanceSettings.m_tTurnIn = MathHelp.LimitFloor(guidanceSettings.m_tTurnIn, 0.1f);
 
-                        guidanceSettings.m_turnMarginSimple = EditorGUILayout.Slider(new GUIContent("Turn distance factor", "Used to tweak when the turn is to begin. Higher value means to start turn earlier.\n" +
+                        EditorGUILayout.PropertyField(m_guidSettingsProp.FindPropertyRelative("m_turnMarginSimple"), new GUIContent("Turn distance factor", "Used to tweak when the turn is to begin. Higher value means to start turn earlier.\n" +
                             "-1: Start turn at waypoint.\n" +
                             "0: Nominal.\n" +
                             "1: Start turn far from waypoint.\n" +
-                            "[m_guidanceSettings.m_turnMarginSimple]"), guidanceSettings.m_turnMarginSimple, -1, 1f);
+                            "[m_guidanceSettings.m_turnMarginSimple]"));
                     }
                 }
 #if UNITY_2019_1_OR_NEWER
@@ -109,15 +105,15 @@ namespace SparseDesign
                 {
                     EditorGUIUtility.labelWidth = 160;
                     GUILayout.BeginHorizontal();
-                    guidanceSettings.m_limitAcceleration = EditorGUILayout.Toggle(new GUIContent("Limit maneouvre [m/s2]", "Limit the maneouver acceleration [m/s^2].\nRecommendation is this to always be true to avoid strange results, especially close to the target.\n[m_guidanceSettings.m_limitAcceleration]"), guidanceSettings.m_limitAcceleration);
-                    if (guidanceSettings.m_limitAcceleration) guidanceSettings.m_maxAcceleration = EditorGUILayout.FloatField(guidanceSettings.m_maxAcceleration);
+                    EditorGUILayout.PropertyField(m_guidSettingsProp.FindPropertyRelative("m_limitAcceleration"), new GUIContent("Limit maneouvre [m/s2]", "Limit the maneouver acceleration [m/s^2].\nRecommendation is this to always be true to avoid strange results, especially close to the target.\n[m_guidanceSettings.m_limitAcceleration]"));
+                    if (guidanceSettings.m_limitAcceleration) EditorGUILayout.PropertyField(m_guidSettingsProp.FindPropertyRelative("m_maxAcceleration"), new GUIContent());
                     if (guidanceSettings.m_maxAcceleration < 0f) { guidanceSettings.m_maxAcceleration = 0f; }
 
                     GUILayout.EndHorizontal();
 
                     GUILayout.BeginHorizontal();
-                    m_missileSupervisor.m_limitFlightTime = EditorGUILayout.Toggle(new GUIContent("Limit flight time [Seconds]", "[m_limitFlightTime]"), m_missileSupervisor.m_limitFlightTime);
-                    if (m_missileSupervisor.m_limitFlightTime) m_missileSupervisor.m_flightTime = EditorGUILayout.FloatField(m_missileSupervisor.m_flightTime);
+                    EditorGUILayout.PropertyField(serializedObject.FindProperty("m_limitFlightTime"), new GUIContent("Limit flight time [Seconds]", "[m_limitFlightTime]"));
+                    if (m_missileSupervisor.m_limitFlightTime) EditorGUILayout.PropertyField(serializedObject.FindProperty("m_flightTime"), new GUIContent());
                     if (m_missileSupervisor.m_flightTime < 0f) { m_missileSupervisor.m_flightTime = 0f; }
                     GUILayout.EndHorizontal();
                 }
@@ -132,15 +128,15 @@ namespace SparseDesign
 
                     if (isTarget)
                     {
-                        m_missileSupervisor.m_interceptRange = EditorGUILayout.FloatField(new GUIContent("Hit Range [m]", "If the missile passes the target within this range it is counted as a hit.\n[m_interceptRange]"), m_missileSupervisor.m_interceptRange);
+                        EditorGUILayout.PropertyField(serializedObject.FindProperty("m_interceptRange"), new GUIContent("Hit Range [m]", "If the missile passes the target within this range it is counted as a hit.\n[m_interceptRange]"));
                         if (m_missileSupervisor.m_interceptRange < 0f) { m_missileSupervisor.m_interceptRange = 0f; }
                     }
 
                     if (isTarget)
                     {
-                        m_missileSupervisor.m_stopAtIntercept = EditorGUILayout.Toggle(new GUIContent("Stop guidance after intercept", "Stops guidance after intercept (passes target).\nThe missile continues going straight ahead.\n[m_stopAtIntercept]"), m_missileSupervisor.m_stopAtIntercept);
+                        EditorGUILayout.PropertyField(serializedObject.FindProperty("m_stopAtIntercept"), new GUIContent("Stop guidance after intercept", "Stops guidance after intercept (passes target).\nThe missile continues going straight ahead.\n[m_stopAtIntercept]"));
                     }
-                    m_missileSupervisor.m_destroyAtHit = EditorGUILayout.Toggle(new GUIContent("Destroy missile at hit", "Destroys and removes missile if hit target.\n[m_destroyAtHit]"), m_missileSupervisor.m_destroyAtHit);
+                    EditorGUILayout.PropertyField(serializedObject.FindProperty("m_destroyAtHit"), new GUIContent("Destroy missile at hit", "Destroys and removes missile if hit target.\n[m_destroyAtHit]"));
                 }
 #if UNITY_2019_1_OR_NEWER
                 EditorGUILayout.EndFoldoutHeaderGroup();
@@ -167,18 +163,18 @@ namespace SparseDesign
                     }
                     EditorGUILayout.EndHorizontal();
 
-                    m_missileSupervisor.m_launchType = (MissileSupervisor.LaunchType)EditorGUILayout.EnumPopup(new GUIContent("Launch Mode", "[m_launchType]"), m_missileSupervisor.m_launchType);
+                    EditorGUILayout.PropertyField(serializedObject.FindProperty("m_launchType"), new GUIContent("Launch Mode", "[m_launchType]"));
                     EditorGUI.indentLevel++;
-                    if (m_missileSupervisor.m_launchType == MissileSupervisor.LaunchType.CUSTOMDIRECTION) m_missileSupervisor.m_launchCustomDir = EditorGUILayout.Vector3Field(new GUIContent("Launch direction", ""), m_missileSupervisor.m_launchCustomDir);
+                    if (m_missileSupervisor.m_launchType == MissileSupervisor.LaunchType.CUSTOMDIRECTION) EditorGUILayout.PropertyField(serializedObject.FindProperty("m_launchCustomDir"), new GUIContent("Launch direction", ""));
                     EditorGUI.indentLevel--;
 
-                    m_missileSupervisor.m_autoLaunch = EditorGUILayout.Toggle(new GUIContent("Automatic launch", "Launch sequence is started in Start() method.\n[m_autoLaunch]"), m_missileSupervisor.m_autoLaunch);
+                    EditorGUILayout.PropertyField(serializedObject.FindProperty("m_autoLaunch"), new GUIContent("Automatic launch", "Launch sequence is started in Start() method.\n[m_autoLaunch]"));
                     EditorGUI.indentLevel++;
-                    if (m_missileSupervisor.m_autoLaunch) m_missileSupervisor.m_trackingDelay = EditorGUILayout.FloatField(new GUIContent("Tracking time [sec]", "Tracking time before launch [seconds].\nWill always be atleast one frame and physics update, even if set to 0.\n[m_trackingDelay]"), m_missileSupervisor.m_trackingDelay);
+                    if (m_missileSupervisor.m_autoLaunch) EditorGUILayout.PropertyField(serializedObject.FindProperty("m_trackingDelay"), new GUIContent("Tracking time [sec]", "Tracking time before launch [seconds].\nWill always be atleast one frame and physics update, even if set to 0.\n[m_trackingDelay]"));
                     if (m_missileSupervisor.m_trackingDelay < 0f) { m_missileSupervisor.m_trackingDelay = 0f; }
                     EditorGUI.indentLevel--;
 
-                    m_missileSupervisor.m_launchSpeed = EditorGUILayout.FloatField(new GUIContent("Launch Speed [m/s]", "Speed at launch. This will be added to any speed the missile already have.\n[m_launchSpeed]"), m_missileSupervisor.m_launchSpeed);
+                    EditorGUILayout.PropertyField(serializedObject.FindProperty("m_launchSpeed"), new GUIContent("Launch Speed [m/s]", "Speed at launch. This will be added to any speed the missile already have.\n[m_launchSpeed]"));
 
                     var rb = m_missileSupervisor.GetComponent<Rigidbody>();
                     if (rb && (rb.drag >= float.Epsilon))
@@ -264,7 +260,7 @@ namespace SparseDesign
 #endif
 
                 EditorGUILayout.LabelField("", GUI.skin.horizontalSlider);
-                m_missileSupervisor.m_debug = EditorGUILayout.Toggle(new GUIContent("Debug Info", "Prints and draw debug info. [m_debug]"), m_missileSupervisor.m_debug);
+                EditorGUILayout.PropertyField(serializedObject.FindProperty("m_debug"), new GUIContent("Debug Info", "Prints and draw debug info. [m_debug]"));
 
                 if (EditorGUI.EndChangeCheck())
                 {

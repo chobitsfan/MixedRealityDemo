@@ -72,19 +72,17 @@ namespace SparseDesign
 
                 //Settings for path following
                 public bool m_loopPath = false;
-                public float m_tTurnIn = 0.5f;
-                public float m_turnMarginSimple = 0f;
-                public float m_pathN = 4f;//Navigation Constant for path following
+                [Range(0.01f, 10)] public float m_tTurnIn = 0.5f;
+                [Range(-1, 1)] public float m_turnMarginSimple = 0f;
+                [Range(2, 20)] public float m_pathN = 4f;//Navigation Constant for path following
 
                 //Settings for CLOS
-                public float m_CLOSN = 4f;//Navigation Constant for CLOS
-
-                //public float m_posFeedBackFactor = 3f;
+                [Range(2, 20)] public float m_CLOSN = 4f;//Navigation Constant for CLOS
 
                 public List<GameObject> m_pathObjs = new List<GameObject>();
 
                 //Settings for specific algorithms
-                public float m_N = 4;//Navigation Constant
+                [Range(2, 20)] public float m_N = 4;//Navigation Constant
 
                 /// <summary>
                 /// Position of path in idx. Do not check idx validity.

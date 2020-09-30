@@ -16,7 +16,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &329009613829071504
 Transform:
   m_ObjectHideFlags: 0
@@ -218,13 +218,26 @@ MonoBehaviour:
   m_flightTime: 10
   m_guidanceSettings:
     m_targetType: 0
+    m_BTT: 0
+    m_maxRollrate: 90
+    m_useMissileDynamics: 0
+    m_bandWidth: 1
     m_limitAcceleration: 1
     m_maxAcceleration: 300
     m_guidanceType: 0
     m_target: {fileID: 0}
+    m_elevatedTrajectory: 1
+    m_pathType: 0
     m_loopPath: 0
     m_tTurnIn: 0.5
+    m_interceptLastWaypoint: 0
     m_turnMarginSimple: 0
+    m_balancedTurn: 0
+    m_balancedTurnMargin: 0
+    m_path: []
+    m_terrainFollowing: 0
+    m_terrainMargin: 10
+    m_terrain: {fileID: 0}
     m_pathN: 4
     m_CLOSN: 4
     m_pathObjs: []
@@ -236,17 +249,30 @@ MonoBehaviour:
     m_speed: 10
     m_limitMotorAcceleration: 1
     m_maxAcceleration: 400
+    m_thrust: 1
+    m_navigationBlocked: 1
+    m_drag: 0
+    m_referenceArea: 1
+    m_Cd: 0.02
   - m_motorType: 3
     m_limitFlightTime: 0
     m_flightTime: 10
     m_speed: 15
     m_limitMotorAcceleration: 1
     m_maxAcceleration: 0
+    m_thrust: 100
+    m_navigationBlocked: 0
+    m_drag: 1
+    m_referenceArea: 0.1
+    m_Cd: 0.02
   m_launchType: 4
   m_launchCustomDir: {x: 0, y: 0, z: 0}
   m_launchObject: {fileID: 0}
   m_launchSpeed: 0
   m_interceptEvent:
+    m_PersistentCalls:
+      m_Calls: []
+  m_passedTarget:
     m_PersistentCalls:
       m_Calls: []
   m_launchEvent:
@@ -263,6 +289,15 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 1
         m_CallState: 2
+  m_guidanceStopEvent:
+    m_PersistentCalls:
+      m_Calls: []
+  m_nextMotorStageEvent:
+    m_PersistentCalls:
+      m_Calls: []
+  m_eventNextWayPoint:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!1001 &7622210192761606644
 PrefabInstance:
   m_ObjectHideFlags: 0
