@@ -27,7 +27,7 @@ public class MyMissileControl : MonoBehaviour
 
     void Boom()
     {
-        Destroy(GameObject.Instantiate(explosion, transform.position, Quaternion.identity), 2);
+        Destroy(GameObject.Instantiate(explosion, transform.position, Quaternion.identity), 1);
         Destroy(gameObject);
     }
 }

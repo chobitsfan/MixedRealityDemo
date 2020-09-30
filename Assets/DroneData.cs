@@ -9,7 +9,8 @@ using UnityEngine;
 public class DroneData : MonoBehaviour
 {
     public int MAVLinkPort;
-    public GameObject Gun;
+    //public GameObject Gun;
+    public GameObject Bullet;
     Thread thread;
     bool gogo = true;
     bool gotPos = false;
@@ -24,7 +25,7 @@ public class DroneData : MonoBehaviour
     bool got_hb = false;
     bool shoot = false;
     bool shooting = false;
-    //float shootingTs = 1f;
+    float shootingTs = 1f;
     // Start is called before the first frame update
     void Start()
     {
@@ -50,21 +51,24 @@ public class DroneData : MonoBehaviour
             newAtt = false;
             rb.MoveRotation(att);
         }
-        if (shoot && !shooting)
+        /*if (shoot && !shooting)
         {
             shooting = true;
             Gun.GetComponent<ParticleSystem>().Play();
-            /*shootingTs -= Time.fixedDeltaTime;
-            if (shootingTs < 0)
-            {
-                shootingTs = 1f;
-                GameObject.Instantiate(Bolt, transform.position - transform.up * 0.2f, Quaternion.LookRotation(-transform.right));
-            }*/
         }
         else if (!shoot && shooting)
         {
             shooting = false;
             Gun.GetComponent<ParticleSystem>().Stop();
+        }*/
+        if (shoot)
+        {
+            shootingTs -= Time.fixedDeltaTime;
+            if (shootingTs < 0)
+            {
+                shootingTs = 1f;
+                GameObject.Instantiate(Bullet, transform.position - transform.up * 0.3f, Quaternion.LookRotation(-transform.right));
+            }
         }
     }
 
@@ -206,7 +210,6 @@ public class DroneData : MonoBehaviour
                         if (data.chan6_raw > 1600)
                         {
                             shoot = true;
-                            //Debug.Log("fire");
                         }
                         else
                         {

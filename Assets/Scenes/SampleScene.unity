@@ -268,6 +268,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: IceLance2
       objectReference: {fileID: 0}
+    - target: {fileID: 6708812923014975308, guid: 0aabd42dbe07d174c83f11e5244a898f,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 6907455654542846868, guid: 0aabd42dbe07d174c83f11e5244a898f,
         type: 3}
       propertyPath: playOnAwake
@@ -300,12 +305,6 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 0aabd42dbe07d174c83f11e5244a898f, type: 3}
---- !u!1 &131197041 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 6708812923014975308, guid: 0aabd42dbe07d174c83f11e5244a898f,
-    type: 3}
-  m_PrefabInstance: {fileID: 77972475}
-  m_PrefabAsset: {fileID: 0}
 --- !u!4 &131197042 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 6705134969969636378, guid: 0aabd42dbe07d174c83f11e5244a898f,
@@ -490,7 +489,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   MAVLinkPort: 17500
-  Gun: {fileID: 131197041}
+  Bullet: {fileID: 1627521441993660, guid: 12ea0a574b594264685afffd52fff036, type: 3}
 --- !u!1 &288777414 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 1591110490357510, guid: d4af3966dba2cd746ab019083640eb8c,
@@ -951,7 +950,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   mat: {fileID: 2100000, guid: 192a07e774d0a07408057105745eb7bf, type: 2}
-  ConnectCamera: 0
+  ConnectCamera: 1
 --- !u!20 &963194227
 Camera:
   m_ObjectHideFlags: 0
