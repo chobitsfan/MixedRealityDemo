@@ -19,13 +19,16 @@ public class DroneData : MonoBehaviour
     bool newPos = false;
     bool newAtt = false;
     Vector3 pos = Vector3.zero;
+    Vector3 vel = Vector3.zero;
     Quaternion att = Quaternion.identity;
-    //long recv_intvl = 0;
     Rigidbody rb;
     bool got_hb = false;
     bool shoot = false;
-    bool shooting = false;
+    //bool shooting = false;
     float shootingTs = 1f;
+    uint lastPosTs = 0;
+    uint lastAttTs = 0;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -45,6 +48,10 @@ public class DroneData : MonoBehaviour
         {
             newPos = false;
             rb.MovePosition(pos);
+        }
+        else
+        {
+            rb.MovePosition(transform.position + new Vector3(vel.x * Time.fixedDeltaTime, vel.y * Time.fixedDeltaTime, vel.z * Time.fixedDeltaTime));
         }
         if (newAtt)
         {
@@ -67,31 +74,10 @@ public class DroneData : MonoBehaviour
             if (shootingTs < 0)
             {
                 shootingTs = 1f;
-                GameObject.Instantiate(Bullet, transform.position - transform.up * 0.3f, Quaternion.LookRotation(-transform.right));
+                GameObject.Instantiate(Bullet, transform.position - transform.up * 0.1f, Quaternion.LookRotation(-transform.right));
             }
         }
     }
-
-#if false
-    // Update is called once per frame
-    void Update()
-    {
-        if (gotAtt && gotPos)
-        {
-            transform.localPosition = pos;
-            transform.localRotation = att;
-            /*if (recv_intvl > 0)
-            {
-                Debug.Log("recv_intvl " + recv_intvl);
-                recv_intvl = 0;
-            }
-            else
-            {
-                Debug.Log("no update");
-            }*/
-        }
-    }
-#endif
 
     void OnDestroy()
     {
@@ -102,9 +88,6 @@ public class DroneData : MonoBehaviour
 
     void RecvData()
     {
-        //System.Diagnostics.Stopwatch stopwatch = new System.Diagnostics.Stopwatch();
-        //stopwatch.Start();
-        //long recv_ts = 0;
         IPEndPoint sender = new IPEndPoint(IPAddress.Any, 0);
         EndPoint myGCS = (EndPoint)sender;
         byte[] buf = new byte[MAVLink.MAVLINK_MAX_PACKET_LEN];
@@ -156,7 +139,7 @@ public class DroneData : MonoBehaviour
                                 target_system = 0,
                                 command = (ushort)MAVLink.MAV_CMD.SET_MESSAGE_INTERVAL,
                                 param1 = (float)MAVLink.MAVLINK_MSG_ID.LOCAL_POSITION_NED,
-                                param2 = 15000
+                                param2 = 20000
                             };
                             byte[] data = mavlinkParse.GenerateMAVLinkPacket10(MAVLink.MAVLINK_MSG_ID.COMMAND_LONG, msgOut);
                             sock.SendTo(data, myGCS);
@@ -168,7 +151,7 @@ public class DroneData : MonoBehaviour
                                 target_system = 0,
                                 command = (ushort)MAVLink.MAV_CMD.SET_MESSAGE_INTERVAL,
                                 param1 = (float)MAVLink.MAVLINK_MSG_ID.ATTITUDE_QUATERNION,
-                                param2 = 15000
+                                param2 = 20000
                             };
                             byte[] data = mavlinkParse.GenerateMAVLinkPacket10(MAVLink.MAVLINK_MSG_ID.COMMAND_LONG, msgOut);
                             sock.SendTo(data, myGCS);
@@ -180,13 +163,15 @@ public class DroneData : MonoBehaviour
                         {
                             gotPos = true;
                             Debug.Log("local_position_ned received");
-                        }
-                        newPos = true;
+                        }                        
                         var data = (MAVLink.mavlink_local_position_ned_t)msg.data;
-                        pos = new Vector3(-data.x, -data.z, data.y);
-                        //Debug.Log("recv local_position_ned " + pos.ToString("F4"));
-                        //recv_intvl = stopwatch.ElapsedMilliseconds - recv_ts;
-                        //recv_ts = stopwatch.ElapsedMilliseconds;
+                        if (data.time_boot_ms > lastPosTs)
+                        {
+                            newPos = true;
+                            lastPosTs = data.time_boot_ms;
+                            pos.Set(-data.x, -data.z, data.y);
+                            vel.Set(-data.vx, -data.vz, data.vy);
+                        }
                     }
                     else if (msg_type == typeof(MAVLink.mavlink_attitude_quaternion_t))
                     {
@@ -194,10 +179,14 @@ public class DroneData : MonoBehaviour
                         {
                             gotAtt = true;
                             Debug.Log("attitude_quaternion received");
-                        }
-                        newAtt = true;
+                        }                        
                         var data = (MAVLink.mavlink_attitude_quaternion_t)msg.data;
-                        att = new Quaternion(-data.q2, -data.q4, data.q3, -data.q1);
+                        if (data.time_boot_ms > lastAttTs)
+                        {
+                            newAtt = true;
+                            lastAttTs = data.time_boot_ms;
+                            att.Set(-data.q2, -data.q4, data.q3, -data.q1);
+                        }
                     }
                     else if (msg_type == typeof(MAVLink.mavlink_rc_channels_raw_t))
                     {
@@ -219,6 +208,5 @@ public class DroneData : MonoBehaviour
                 }
             }
         }
-        //stopwatch.Stop();
     }
 }

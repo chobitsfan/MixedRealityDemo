@@ -21,7 +21,6 @@ public class MyMissileControl : MonoBehaviour
 
     private void OnCollisionEnter(Collision collision)
     {
-        if (collision.gameObject.CompareTag("Emery")) return;
         Boom();
     }
 

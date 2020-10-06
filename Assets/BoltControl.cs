@@ -15,6 +15,11 @@ public class BoltControl : MonoBehaviour
         rb.velocity = transform.forward * speed;
     }
 
+    private void Reset()
+    {
+        speed = 5f;
+    }
+
     // Update is called once per frame
     void Update()
     {
@@ -24,7 +29,7 @@ public class BoltControl : MonoBehaviour
 
     void OnCollisionEnter(Collision collision)
     {
-        if (collision.gameObject.CompareTag("Emery")) Boom();
+        Boom();
     }
 
     void Boom()
