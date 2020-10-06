@@ -7,7 +7,7 @@ public class BoltControl : MonoBehaviour
     public float speed;
     public GameObject explosion;
     private Rigidbody rb;
-    float ts = 4f;
+    float ts = 3f;
     // Start is called before the first frame update
     void Start()
     {
