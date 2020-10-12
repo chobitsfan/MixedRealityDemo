@@ -5,12 +5,14 @@ using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class DroneData : MonoBehaviour
 {
     public int MAVLinkPort;
     //public GameObject Gun;
     public GameObject Bullet;
+    public GameObject MsgUI;
     Thread thread;
     bool gogo = true;
     bool gotPos = false;
@@ -28,6 +30,9 @@ public class DroneData : MonoBehaviour
     float shootingTs = 1f;
     uint lastPosTs = 0;
     uint lastAttTs = 0;
+    uint posInt = 0;
+    uint attInt = 0;
+    Text msgText;
 
     // Start is called before the first frame update
     void Start()
@@ -35,6 +40,7 @@ public class DroneData : MonoBehaviour
         thread = new Thread(new ThreadStart(RecvData));
         thread.Start();
         rb = GetComponent<Rigidbody>();
+        msgText = MsgUI.GetComponent<Text>();
     }
 
     private void Reset()
@@ -48,6 +54,7 @@ public class DroneData : MonoBehaviour
         {
             newPos = false;
             rb.MovePosition(pos);
+            msgText.text = "pos:" + posInt + " ms";
         }
         else
         {
@@ -57,6 +64,7 @@ public class DroneData : MonoBehaviour
         {
             newAtt = false;
             rb.MoveRotation(att);
+            //msgText.text = "att:" + attInt + " ms";
         }
         /*if (shoot && !shooting)
         {
@@ -127,7 +135,7 @@ public class DroneData : MonoBehaviour
                                 target_system = 0,
                                 command = (ushort)MAVLink.MAV_CMD.SET_MESSAGE_INTERVAL,
                                 param1 = (float)MAVLink.MAVLINK_MSG_ID.RC_CHANNELS_RAW,
-                                param2 = 50000
+                                param2 = 20000
                             };
                             byte[] data = mavlinkParse.GenerateMAVLinkPacket10(MAVLink.MAVLINK_MSG_ID.COMMAND_LONG, msgOut);
                             sock.SendTo(data, myGCS);
@@ -168,6 +176,7 @@ public class DroneData : MonoBehaviour
                         if (data.time_boot_ms > lastPosTs)
                         {
                             newPos = true;
+                            posInt = data.time_boot_ms - lastPosTs;
                             lastPosTs = data.time_boot_ms;
                             pos.Set(-data.x, -data.z, data.y);
                             vel.Set(-data.vx, -data.vz, data.vy);
@@ -184,6 +193,7 @@ public class DroneData : MonoBehaviour
                         if (data.time_boot_ms > lastAttTs)
                         {
                             newAtt = true;
+                            attInt = data.time_boot_ms - lastAttTs;
                             lastAttTs = data.time_boot_ms;
                             att.Set(-data.q2, -data.q4, data.q3, -data.q1);
                         }

@@ -12,7 +12,8 @@ public class BoltControl : MonoBehaviour
     void Start()
     {
         rb = GetComponent<Rigidbody>();
-        rb.velocity = transform.forward * speed;
+        rb.AddForce(transform.forward * speed, ForceMode.VelocityChange);
+        rb.AddTorque(transform.forward * 5, ForceMode.VelocityChange);
     }
 
     private void Reset()
