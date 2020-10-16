@@ -24,7 +24,7 @@ public class DroneData : MonoBehaviour
     Vector3 vel = Vector3.zero;
     Quaternion att = Quaternion.identity;
     Rigidbody rb;
-    bool got_hb = false;
+    bool gotHb = false;
     bool shoot = false;
     //bool shooting = false;
     float shootingTs = 1f;
@@ -33,6 +33,7 @@ public class DroneData : MonoBehaviour
     uint posInt = 0;
     uint attInt = 0;
     Text msgText;
+    int hitCount = 0;
 
     // Start is called before the first frame update
     void Start()
@@ -93,6 +94,10 @@ public class DroneData : MonoBehaviour
         thread.Join();
     }
 
+    private void OnCollisionEnter(Collision collision)
+    {
+        hitCount = 3;
+    }
 
     void RecvData()
     {
@@ -101,7 +106,7 @@ public class DroneData : MonoBehaviour
         byte[] buf = new byte[MAVLink.MAVLINK_MAX_PACKET_LEN];
         MAVLink.MavlinkParse mavlinkParse = new MAVLink.MavlinkParse();
         Socket sock = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
-        sock.ReceiveTimeout = 1000;
+        sock.ReceiveTimeout = 10;
         sock.Bind(new IPEndPoint(IPAddress.Any, MAVLinkPort));
         while (gogo)
         {
@@ -114,6 +119,20 @@ public class DroneData : MonoBehaviour
             {
 
             }
+            if (gotHb && hitCount > 0)
+            {
+                hitCount--;
+                MAVLink.mavlink_distance_sensor_t msgOut = new MAVLink.mavlink_distance_sensor_t
+                {
+                    type = 10, //shock
+                    min_distance = 1,
+                    max_distance = 300,
+                    current_distance = 50,
+                    orientation = 0
+                };
+                byte[] pkt = mavlinkParse.GenerateMAVLinkPacket10(MAVLink.MAVLINK_MSG_ID.DISTANCE_SENSOR, msgOut);
+                sock.SendTo(pkt, myGCS);
+            }
             if (recvBytes > 0)
             {
                 MAVLink.MAVLinkMessage msg = mavlinkParse.ReadPacket(buf);
@@ -123,9 +142,9 @@ public class DroneData : MonoBehaviour
                     //Debug.Log("recv "+msg_type);
                     if (msg_type == typeof(MAVLink.mavlink_heartbeat_t))
                     {
-                        if (!got_hb)
+                        if (!gotHb)
                         {
-                            got_hb = true;
+                            gotHb = true;
                             Debug.Log("heartbeat received");
                         }
                         if (!gotRC)

@@ -25,7 +25,7 @@ public class EmeryWaypoint : MonoBehaviour
             if (near)
             {
                 near = false;
-                Vector2 pos = Random.insideUnitCircle * 4;
+                Vector2 pos = Random.insideUnitCircle * 2;
                 Vector3 localPos = new Vector3(-15, pos.y, pos.x);
                 transform.position = player.transform.TransformPoint(localPos);
             }

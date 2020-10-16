@@ -40,7 +40,7 @@ public class FPV_CAM : MonoBehaviour
     {
         ptr = IntPtr.Zero;
         ptr = NPlayer_Init();
-        if (ConnectCamera) NPlayer_Connect(ptr, "rtsp://192.168.1.247/v1/", 1);
+        if (ConnectCamera) NPlayer_Connect(ptr, "rtsp://192.168.50.253/v1/", 1);
         bStart = false;
 #if DISTORT
         double _CX = 6.395 * 100;
