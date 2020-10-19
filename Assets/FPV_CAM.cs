@@ -40,25 +40,27 @@ public class FPV_CAM : MonoBehaviour
     {
         ptr = IntPtr.Zero;
         ptr = NPlayer_Init();
-        if (ConnectCamera) NPlayer_Connect(ptr, "rtsp://192.168.50.253/v1/", 1);
+        if (ConnectCamera) NPlayer_Connect(ptr, "rtsp://192.168.1.113/v1/", 1);
         bStart = false;
 #if DISTORT
         double _CX = 6.395 * 100;
         double _CY = 3.595 * 100;
-        double _FX = 1.2936588953959019 * 1000;
-        double _FY = 1.2936588953959019 * 1000;
-        double _K1 = 3.9125784966932795 * 0.01;
-        double _K2 = 7.6818881727080013 * 0.1;
+        double _FX = 7.861770574791525 * 100;
+        double _FY = 7.861770574791525 * 100;
+        double _K1 = -3.516494249153661 * 0.1;
+        double _K2 = 1.5420292302242117 * 0.1;
         double _P1 = 0;
         double _P2 = 0;
-        double _K3 = -3.238587127227778;
+        double _K3 = -3.1383869425302094 * 0.01;
         int camWidth = 1280;
         int camHeight = 720;
         Debug.Log(SystemInfo.SupportsTextureFormat(TextureFormat.RGFloat) ? "RGFloat supported" : "RGFloat not supported");
-        distortMap = new Texture2D(camWidth, camHeight, TextureFormat.RGFloat, false, true);
-        distortMap.filterMode = FilterMode.Bilinear;
-        distortMap.anisoLevel = 2;
-        distortMap.wrapMode = TextureWrapMode.Clamp;
+        distortMap = new Texture2D(camWidth, camHeight, TextureFormat.RGFloat, false, true)
+        {
+            filterMode = FilterMode.Bilinear,
+            anisoLevel = 2,
+            wrapMode = TextureWrapMode.Clamp
+        };
         float[] distortData = new float[camWidth * camHeight * 2];
         for (int i = 0; i < distortData.Length; i++)
         {
