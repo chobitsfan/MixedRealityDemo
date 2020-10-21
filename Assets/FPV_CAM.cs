@@ -1,59 +1,34 @@
 ﻿#define DISTORT
 
 using System;
-using System.Runtime.InteropServices;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class FPV_CAM : MonoBehaviour
 {
-    [DllImport("vplayerUnity.dll")]
-    public static extern IntPtr NPlayer_Init();
-    [DllImport("vplayerUnity.dll")]
-    public static extern int NPlayer_Connect(IntPtr pPlayer, string url, int mode);
-    [DllImport("vplayerUnity.dll")]
-    public static extern int NPlayer_GetWidth(IntPtr pPlayer);
-    [DllImport("vplayerUnity.dll")]
-    public static extern int NPlayer_GetHeight(IntPtr pPlayer);
-    [DllImport("vplayerUnity.dll")]
-    public static extern int NPlayer_Uninit(IntPtr pPlayer);
-    [DllImport("vplayerUnity.dll")]
-    public static extern int NPlayer_ReadFrame(IntPtr pPlayer, IntPtr buffer, out UInt64 timestamp);
-
     public Material mat;
-    public bool ConnectCamera;
 
     Texture2D distortMap;
 
-    IntPtr ptr = IntPtr.Zero;
-    bool bStart = false;
-    Texture2D texY;
-    Texture2D texU;
-    Texture2D texV;
-    int w, h;    
-    byte[] buffer;
-    protected IntPtr unmanagedBuffer;
+    Camera cam;
 
     // Start is called before the first frame update
     void Start()
     {
-        ptr = IntPtr.Zero;
-        ptr = NPlayer_Init();
-        if (ConnectCamera) NPlayer_Connect(ptr, "rtsp://192.168.1.113/v1/", 1);
-        bStart = false;
+        cam = GetComponent<Camera>();
 #if DISTORT
-        double _CX = 6.395 * 100;
-        double _CY = 3.595 * 100;
-        double _FX = 7.861770574791525 * 100;
-        double _FY = 7.861770574791525 * 100;
-        double _K1 = -3.516494249153661 * 0.1;
-        double _K2 = 1.5420292302242117 * 0.1;
-        double _P1 = 0;
-        double _P2 = 0;
-        double _K3 = -3.1383869425302094 * 0.01;
-        int camWidth = 1280;
-        int camHeight = 720;
+        double _CX = 639.5;
+        double _CY = 359.5;
+        double _FX = 795.04077928936863;
+        double _FY = 795.04077928936863;
+        double _K1 = -0.36042148522727718;
+        double _K2 = 0.16639675638606838;
+        double _P1 = -2.7878989585024992 * 0.001;
+        double _P2 = -9.9880941608639822 * 0.0001;
+        double _K3 = -3.0924601782932153 * 0.01;
+        int camWidth = cam.targetTexture.width;
+        int camHeight = cam.targetTexture.height;
         Debug.Log(SystemInfo.SupportsTextureFormat(TextureFormat.RGFloat) ? "RGFloat supported" : "RGFloat not supported");
         distortMap = new Texture2D(camWidth, camHeight, TextureFormat.RGFloat, false, true)
         {
@@ -62,13 +37,9 @@ public class FPV_CAM : MonoBehaviour
             wrapMode = TextureWrapMode.Clamp
         };
         float[] distortData = new float[camWidth * camHeight * 2];
-        for (int i = 0; i < distortData.Length; i++)
+        for (float i = 0; i < camHeight; i += 1)
         {
-            distortData[i] = -1;
-        }
-        for (float i = -20; i <= camHeight + 20; i += 0.5f)
-        {
-            for (float j = -20; j <= camWidth + 20; j += 0.5f)
+            for (float j = 0; j < camWidth; j += 1)
             {
                 double x = (j - _CX) / _FX;
                 double y = (i - _CY) / _FY;
@@ -89,16 +60,7 @@ public class FPV_CAM : MonoBehaviour
                     distortData[idx + 1] = i / camHeight;
                 }
             }
-        }
-        int count = 0;
-        for (int i = 0; i < distortData.Length; i++)
-        {
-            if (distortData[i] < 0)
-            {
-                count++;
-            }
-        }
-        Debug.Log("unfilled cell:" + count / 2);
+        }        
         distortMap.SetPixelData(distortData, 0);
         distortMap.Apply(false);
         mat.SetTexture("_DistortTex", distortMap);
@@ -106,83 +68,7 @@ public class FPV_CAM : MonoBehaviour
     }
 
     void OnRenderImage(RenderTexture source, RenderTexture destination)
-    {
+    {        
         Graphics.Blit(source, destination, mat);
-    }
-
-    void initVideoFrameBuffer()
-    {
-        w = NPlayer_GetWidth(ptr);
-        h = NPlayer_GetHeight(ptr);
-        if (w != 0 && h != 0)
-        {
-            Debug.Log("width = " + w + ", height = " + h);
-            int frameLen = w * h * 3;
-            Debug.Log("frameLen = " + frameLen);
-            buffer = new byte[frameLen];
-            unmanagedBuffer = Marshal.AllocHGlobal(frameLen);
-
-            bStart = true;
-
-            texY = new Texture2D(w, h, TextureFormat.Alpha8, false);
-            //U分量和V分量分別存放在兩張貼圖中
-            texU = new Texture2D(w >> 1, h >> 1, TextureFormat.Alpha8, false);
-            texV = new Texture2D(w >> 1, h >> 1, TextureFormat.Alpha8, false);
-            mat.SetTexture("_YTex", texY);
-            mat.SetTexture("_UTex", texU);
-            mat.SetTexture("_VTex", texV);
-        }
-    }
-
-    void releaseVideoFrameBuffer()
-    {
-        if (unmanagedBuffer == IntPtr.Zero)
-            Marshal.FreeHGlobal(unmanagedBuffer);
-    }
-
-    void getVideoFameBuffer()
-    {
-        UInt64 timestamp;
-        int frameLen = NPlayer_ReadFrame(ptr, unmanagedBuffer, out timestamp);
-        Marshal.Copy(unmanagedBuffer, buffer, 0, frameLen);
-
-        int Ycount = w * h;
-        int UVcount = w * (h >> 2);
-        texY.SetPixelData(buffer, 0, 0);
-        texY.Apply();
-        texU.SetPixelData(buffer, 0, Ycount);
-        texU.Apply();
-        texV.SetPixelData(buffer, 0, Ycount + UVcount);
-        texV.Apply();
-    }
-
-    void Update()
-    {
-        if (ConnectCamera)
-        {
-            if (bStart)
-            {
-                //Debug.Log("getVideoFameBuffer");
-                getVideoFameBuffer();
-            }
-            else
-            {
-                //Debug.Log("initVideoFrameBuffer");
-                initVideoFrameBuffer();
-            }
-        }
-    }
-
-    private void OnDestroy()
-    {
-        //Debug.Log("VplayerUnityframeReader OnDestroy");
-        NPlayer_Uninit(ptr);
-        ptr = IntPtr.Zero;
-        if (bStart) releaseVideoFrameBuffer();
-    }
-
-    private void Reset()
-    {
-        ConnectCamera = true;
     }
 }
