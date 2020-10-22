@@ -48,12 +48,12 @@
             sampler2D _UTex;
             sampler2D _VTex;
 
-            fixed4 frag(v2f i) : SV_Target
+            float4 frag(v2f i) : SV_Target
             {
-                fixed2 uv = fixed2(i.uv.x,1 - i.uv.y);
-                fixed4 ycol = tex2D(_YTex, uv);
-                fixed4 ucol = tex2D(_UTex, uv);
-                fixed4 vcol = tex2D(_VTex, uv);
+                float2 uv = float2(i.uv.x,1 - i.uv.y);
+                float4 ycol = tex2D(_YTex, uv);
+                float4 ucol = tex2D(_UTex, uv);
+                float4 vcol = tex2D(_VTex, uv);
                 float r = ycol.a + 1.4022 * vcol.a - 0.7011;
                 float g = ycol.a - 0.3456 * ucol.a - 0.7145 * vcol.a + 0.53005;
                 float b = ycol.a + 1.771 * ucol.a - 0.8855;
@@ -63,7 +63,7 @@
 #else
                 float4 col = tex2D(_MainTex, i.uv);
 #endif
-                return col * col.a + fixed4(r, g, b, 1) * (1 - col.a);
+                return col * col.a + float4(r, g, b, 1) * (1 - col.a);
             }
             ENDCG
         }

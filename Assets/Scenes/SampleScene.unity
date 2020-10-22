@@ -171,7 +171,7 @@ Camera:
   m_BackGroundColor: {r: 1, g: 0, b: 1, a: 0}
   m_projectionMatrixMode: 1
   m_GateFitMode: 2
-  m_FOVAxisMode: 0
+  m_FOVAxisMode: 1
   m_SensorSize: {x: 36, y: 24}
   m_LensShift: {x: 0, y: 0}
   m_FocalLength: 50
@@ -183,7 +183,7 @@ Camera:
     height: 1
   near clip plane: 0.1
   far clip plane: 30
-  field of view: 49.207233
+  field of view: 48.71792
   orthographic: 0
   orthographic size: 5
   m_Depth: 0
@@ -686,7 +686,7 @@ Camera:
   m_BackGroundColor: {r: 1, g: 0, b: 1, a: 0}
   m_projectionMatrixMode: 1
   m_GateFitMode: 2
-  m_FOVAxisMode: 0
+  m_FOVAxisMode: 1
   m_SensorSize: {x: 36, y: 24}
   m_LensShift: {x: 0, y: 0}
   m_FocalLength: 50
@@ -698,7 +698,7 @@ Camera:
     height: 1
   near clip plane: 0.1
   far clip plane: 30
-  field of view: 49.207233
+  field of view: 48.71792
   orthographic: 0
   orthographic size: 5
   m_Depth: -1
@@ -1168,7 +1168,7 @@ PrefabInstance:
     - target: {fileID: 1254015978943064155, guid: 8d8059b354889a34a8a9cca63c017df7,
         type: 3}
       propertyPath: m_LocalPosition.x
-      value: 0
+      value: -10
       objectReference: {fileID: 0}
     - target: {fileID: 1254015978943064155, guid: 8d8059b354889a34a8a9cca63c017df7,
         type: 3}
@@ -1178,7 +1178,7 @@ PrefabInstance:
     - target: {fileID: 1254015978943064155, guid: 8d8059b354889a34a8a9cca63c017df7,
         type: 3}
       propertyPath: m_LocalPosition.z
-      value: 0
+      value: 5
       objectReference: {fileID: 0}
     - target: {fileID: 1254015978943064155, guid: 8d8059b354889a34a8a9cca63c017df7,
         type: 3}
@@ -1270,7 +1270,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!65 &1988717205
 BoxCollider:
   m_ObjectHideFlags: 0

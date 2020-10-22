@@ -43,15 +43,15 @@ public class FPV_CAM : MonoBehaviour
         if (ConnectCamera) NPlayer_Connect(ptr, "rtsp://192.168.1.113/v1/", 1);
         bStart = false;
 #if DISTORT
-        double _CX = 6.395 * 100;
-        double _CY = 3.595 * 100;
-        double _FX = 7.861770574791525 * 100;
-        double _FY = 7.861770574791525 * 100;
-        double _K1 = -3.516494249153661 * 0.1;
-        double _K2 = 1.5420292302242117 * 0.1;
-        double _P1 = 0;
-        double _P2 = 0;
-        double _K3 = -3.1383869425302094 * 0.01;
+        double _CX = 639.5;
+        double _CY = 359.5;
+        double _FX = 795.04077928936863;
+        double _FY = 795.04077928936863;
+        double _K1 = -0.36042148522727718;
+        double _K2 = 0.16639675638606838;
+        double _P1 = -2.7878989585024992 * 0.001;
+        double _P2 = -9.9880941608639822 * 0.0001;
+        double _K3 = -3.0924601782932153 * 0.01;
         int camWidth = 1280;
         int camHeight = 720;
         Debug.Log(SystemInfo.SupportsTextureFormat(TextureFormat.RGFloat) ? "RGFloat supported" : "RGFloat not supported");
