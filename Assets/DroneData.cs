@@ -33,11 +33,24 @@ public class DroneData : MonoBehaviour
     uint posInt = 0;
     uint attInt = 0;
     Text msgText;
-    int hitCount = 0;
+
+    IPEndPoint sender;
+    EndPoint drone;
+    MAVLink.MavlinkParse mavlinkParse;
+    Socket sock;
 
     // Start is called before the first frame update
     void Start()
     {
+        sender = new IPEndPoint(IPAddress.Any, 0);
+        drone = (EndPoint)sender;
+        mavlinkParse = new MAVLink.MavlinkParse();
+        sock = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp)
+        {
+            ReceiveTimeout = 1000
+        };
+        sock.Bind(new IPEndPoint(IPAddress.Any, MAVLinkPort));
+
         thread = new Thread(new ThreadStart(RecvData));
         thread.Start();
         rb = GetComponent<Rigidbody>();
@@ -67,16 +80,6 @@ public class DroneData : MonoBehaviour
             rb.MoveRotation(att);
             //msgText.text = "att:" + attInt + " ms";
         }
-        /*if (shoot && !shooting)
-        {
-            shooting = true;
-            Gun.GetComponent<ParticleSystem>().Play();
-        }
-        else if (!shoot && shooting)
-        {
-            shooting = false;
-            Gun.GetComponent<ParticleSystem>().Stop();
-        }*/
         if (shoot)
         {
             shootingTs -= Time.fixedDeltaTime;
@@ -92,47 +95,55 @@ public class DroneData : MonoBehaviour
     {
         gogo = false;        
         thread.Join();
+        sock.Close();
     }
 
     private void OnCollisionEnter(Collision collision)
     {
-        hitCount = 3;
+        SendDistSensor(10, 0);
+    }
+
+    private void OnCollisionStay(Collision collision)
+    {
+        SendDistSensor(10, 0);
+    }
+
+    private void OnCollisionExit(Collision collision)
+    {
+        SendDistSensor(10, 0);
+    }
+
+    private void SendDistSensor(ushort dist, byte orientation)
+    {
+        if (gotHb)
+        {
+            MAVLink.mavlink_distance_sensor_t msg = new MAVLink.mavlink_distance_sensor_t
+            {
+                type = 10, //shock
+                min_distance = 1,
+                max_distance = 300,
+                current_distance = dist,
+                orientation = orientation
+            };
+            byte[] pkt = mavlinkParse.GenerateMAVLinkPacket10(MAVLink.MAVLINK_MSG_ID.DISTANCE_SENSOR, msg);
+            sock.SendTo(pkt, drone);
+        }
     }
 
     void RecvData()
     {
-        IPEndPoint sender = new IPEndPoint(IPAddress.Any, 0);
-        EndPoint myGCS = (EndPoint)sender;
         byte[] buf = new byte[MAVLink.MAVLINK_MAX_PACKET_LEN];
-        MAVLink.MavlinkParse mavlinkParse = new MAVLink.MavlinkParse();
-        Socket sock = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
-        sock.ReceiveTimeout = 10;
-        sock.Bind(new IPEndPoint(IPAddress.Any, MAVLinkPort));
         while (gogo)
         {
             int recvBytes = 0;
             try
             {
-                recvBytes = sock.ReceiveFrom(buf, ref myGCS);
+                recvBytes = sock.ReceiveFrom(buf, ref drone);
             }
             catch (SocketException)
             {
 
-            }
-            if (gotHb && hitCount > 0)
-            {
-                hitCount--;
-                MAVLink.mavlink_distance_sensor_t msgOut = new MAVLink.mavlink_distance_sensor_t
-                {
-                    type = 10, //shock
-                    min_distance = 1,
-                    max_distance = 300,
-                    current_distance = 50,
-                    orientation = 0
-                };
-                byte[] pkt = mavlinkParse.GenerateMAVLinkPacket10(MAVLink.MAVLINK_MSG_ID.DISTANCE_SENSOR, msgOut);
-                sock.SendTo(pkt, myGCS);
-            }
+            }            
             if (recvBytes > 0)
             {
                 MAVLink.MAVLinkMessage msg = mavlinkParse.ReadPacket(buf);
@@ -157,7 +168,7 @@ public class DroneData : MonoBehaviour
                                 param2 = 20000
                             };
                             byte[] data = mavlinkParse.GenerateMAVLinkPacket10(MAVLink.MAVLINK_MSG_ID.COMMAND_LONG, msgOut);
-                            sock.SendTo(data, myGCS);
+                            sock.SendTo(data, drone);
                         }
                         if (!gotPos)
                         {
@@ -169,7 +180,7 @@ public class DroneData : MonoBehaviour
                                 param2 = 20000
                             };
                             byte[] data = mavlinkParse.GenerateMAVLinkPacket10(MAVLink.MAVLINK_MSG_ID.COMMAND_LONG, msgOut);
-                            sock.SendTo(data, myGCS);
+                            sock.SendTo(data, drone);
                         }
                         if (!gotAtt)
                         {
@@ -181,7 +192,7 @@ public class DroneData : MonoBehaviour
                                 param2 = 20000
                             };
                             byte[] data = mavlinkParse.GenerateMAVLinkPacket10(MAVLink.MAVLINK_MSG_ID.COMMAND_LONG, msgOut);
-                            sock.SendTo(data, myGCS);
+                            sock.SendTo(data, drone);
                         }
                     }
                     else if (msg_type == typeof(MAVLink.mavlink_local_position_ned_t))
