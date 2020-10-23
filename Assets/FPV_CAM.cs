@@ -66,9 +66,9 @@ public class FPV_CAM : MonoBehaviour
         {
             distortData[i] = -1;
         }
-        for (float i = -20; i <= camHeight + 20; i += 0.5f)
+        for (float i = 0; i < camHeight; i += 1)
         {
-            for (float j = -20; j <= camWidth + 20; j += 0.5f)
+            for (float j = 0; j < camWidth; j += 1)
             {
                 double x = (j - _CX) / _FX;
                 double y = (i - _CY) / _FY;
@@ -90,15 +90,7 @@ public class FPV_CAM : MonoBehaviour
                 }
             }
         }
-        int count = 0;
-        for (int i = 0; i < distortData.Length; i++)
-        {
-            if (distortData[i] < 0)
-            {
-                count++;
-            }
-        }
-        Debug.Log("unfilled cell:" + count / 2);
+        
         distortMap.SetPixelData(distortData, 0);
         distortMap.Apply(false);
         mat.SetTexture("_DistortTex", distortMap);
