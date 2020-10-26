@@ -22,6 +22,7 @@ public class FPV_CAM : MonoBehaviour
     public static extern int NPlayer_ReadFrame(IntPtr pPlayer, IntPtr buffer, out UInt64 timestamp);
 
     public Material mat;
+    public string RtspUrl;
     public bool ConnectCamera;
 
     Texture2D distortMap;
@@ -40,7 +41,7 @@ public class FPV_CAM : MonoBehaviour
     {
         ptr = IntPtr.Zero;
         ptr = NPlayer_Init();
-        if (ConnectCamera) NPlayer_Connect(ptr, "rtsp://192.168.1.113/v1/", 1);
+        if (ConnectCamera) NPlayer_Connect(ptr, RtspUrl, 1);
         bStart = false;
 #if DISTORT
         double _CX = 639.5;
@@ -91,10 +92,10 @@ public class FPV_CAM : MonoBehaviour
                 y_distort += (_P1 * (r2 + 2 * y * y) + 2 * _P2 * x * y);
                 x_distort = x_distort * _FX + _CX;
                 y_distort = y_distort * _FY + _CY;
-                if (px == 0 && py == 0)
+                /*if (px == 0 && py == 0)
                 {
                     Debug.Log("(0, 0) -> " + x_distort + " , " + y_distort);
-                }
+                }*/
                 int j_distort = (int)Math.Round(x_distort);
                 int i_distort = (int)Math.Round(y_distort);
                 if (i_distort >= 0 && j_distort >= 0 && i_distort < camHeight && j_distort < camWidth)
