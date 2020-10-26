@@ -50,7 +50,7 @@
 
             float4 frag(v2f i) : SV_Target
             {
-                float2 uv = float2(i.uv.x,1 - i.uv.y);
+                float2 uv = float2(i.uv.x, 1 - i.uv.y);
                 float4 ycol = tex2D(_YTex, uv);
                 float4 ucol = tex2D(_UTex, uv);
                 float4 vcol = tex2D(_VTex, uv);

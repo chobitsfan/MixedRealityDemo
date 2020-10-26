@@ -52,6 +52,17 @@ public class FPV_CAM : MonoBehaviour
         double _P1 = -2.7878989585024992 * 0.001;
         double _P2 = -9.9880941608639822 * 0.0001;
         double _K3 = -3.0924601782932153 * 0.01;
+#if true
+        double _FX2 = 567.82342529; //getOptimalNewCameraMatrix wth alpha = 1
+        double _CX2 = 634.76967966;
+        double _FY2 = 569.19769287;
+        double _CY2 = 352.92940841;
+#else
+        double _FX2 = 606.21734619; //getOptimalNewCameraMatrix wth alpha = 0
+        double _CX2 = 635.51305371;
+        double _FY2 = 733.26403809;
+        double _CY2 = 357.52916387;
+#endif
         int camWidth = 1280;
         int camHeight = 720;
         Debug.Log(SystemInfo.SupportsTextureFormat(TextureFormat.RGFloat) ? "RGFloat supported" : "RGFloat not supported");
@@ -66,12 +77,12 @@ public class FPV_CAM : MonoBehaviour
         {
             distortData[i] = -1;
         }
-        for (float i = 0; i < camHeight; i += 1)
+        for (double py = 0; py < camHeight; py += 0.5)
         {
-            for (float j = 0; j < camWidth; j += 1)
+            for (double px = 0; px < camWidth; px += 0.5)
             {
-                double x = (j - _CX) / _FX;
-                double y = (i - _CY) / _FY;
+                double x = (px - _CX2) / _FX2;
+                double y = (py - _CY2) / _FY2;
                 double r2 = x * x + y * y;
                 double distort = 1 + _K1 * r2 + _K2 * r2 * r2 + _K3 * r2 * r2 * r2;
                 double x_distort = x * distort;
@@ -80,13 +91,17 @@ public class FPV_CAM : MonoBehaviour
                 y_distort += (_P1 * (r2 + 2 * y * y) + 2 * _P2 * x * y);
                 x_distort = x_distort * _FX + _CX;
                 y_distort = y_distort * _FY + _CY;
+                if (px == 0 && py == 0)
+                {
+                    Debug.Log("(0, 0) -> " + x_distort + " , " + y_distort);
+                }
                 int j_distort = (int)Math.Round(x_distort);
                 int i_distort = (int)Math.Round(y_distort);
                 if (i_distort >= 0 && j_distort >= 0 && i_distort < camHeight && j_distort < camWidth)
                 {
                     int idx = i_distort * camWidth * 2 + j_distort * 2; //TextureFormat.RGFloat -> 2 elements (u,v) per pixel
-                    distortData[idx] = j / camWidth;
-                    distortData[idx + 1] = i / camHeight;
+                    distortData[idx] = (float)(px / camWidth);
+                    distortData[idx + 1] = (float)(py / camHeight);
                 }
             }
         }
