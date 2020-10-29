@@ -33,6 +33,7 @@ public class DroneData : MonoBehaviour
     uint posInt = 0;
     uint attInt = 0;
     Text msgText;
+    byte avoidAngle = 0;
 
     IPEndPoint sender;
     EndPoint drone;
@@ -100,17 +101,26 @@ public class DroneData : MonoBehaviour
 
     private void OnCollisionEnter(Collision collision)
     {
-        SendDistSensor(10, 0);
+        Vector3 impact = collision.gameObject.transform.position - transform.position;
+        Debug.DrawRay(transform.position, impact, Color.red, 5, false);
+        Vector2 impact2d = new Vector2(impact.x, impact.z);
+        Vector3 heading = -transform.right;
+        Vector2 heading2d = new Vector2(heading.x, heading.z);
+        float angle = -Vector2.SignedAngle(heading2d, impact2d); //https://forum.unity.com/threads/vector2-signedangle.507058/
+        if (angle < 0) angle += 360f;
+        avoidAngle = (byte)(angle / 2f);
+        SendDistSensor(5, avoidAngle);
+        Debug.Log("hit " + collision.gameObject.name);
     }
 
     private void OnCollisionStay(Collision collision)
     {
-        SendDistSensor(10, 0);
+        SendDistSensor(5, avoidAngle);
     }
 
     private void OnCollisionExit(Collision collision)
     {
-        SendDistSensor(10, 0);
+        SendDistSensor(5, avoidAngle);
     }
 
     private void SendDistSensor(ushort dist, byte orientation)

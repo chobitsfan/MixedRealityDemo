@@ -886,7 +886,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   mat: {fileID: 2100000, guid: 192a07e774d0a07408057105745eb7bf, type: 2}
   RtspUrl: rtsp://192.168.1.126/v1/
-  ConnectCamera: 1
+  ConnectCamera: 0
 --- !u!20 &963194227
 Camera:
   m_ObjectHideFlags: 0
