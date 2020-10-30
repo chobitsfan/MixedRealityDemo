@@ -13,6 +13,7 @@ public class DroneData : MonoBehaviour
     //public GameObject Gun;
     public GameObject Bullet;
     public GameObject MsgUI;
+    public GameObject HudText;
     Thread thread;
     bool gogo = true;
     bool gotPos = false;
@@ -34,6 +35,7 @@ public class DroneData : MonoBehaviour
     uint attInt = 0;
     Text msgText;
     byte avoidAngle = 0;
+    float hudTs = 0f;
 
     IPEndPoint sender;
     EndPoint drone;
@@ -56,6 +58,18 @@ public class DroneData : MonoBehaviour
         thread.Start();
         rb = GetComponent<Rigidbody>();
         msgText = MsgUI.GetComponent<Text>();
+    }
+
+    private void Update()
+    {
+        if (hudTs > 0)
+        {
+            hudTs -= Time.deltaTime;
+            if (hudTs <= 0)
+            {
+                HudText.SetActive(false);
+            }
+        }
     }
 
     private void Reset()
@@ -110,6 +124,12 @@ public class DroneData : MonoBehaviour
         if (angle < 0) angle += 360f;
         avoidAngle = (byte)(angle / 2f);
         SendDistSensor(5, avoidAngle);
+
+        UnityEngine.UI.Text text = HudText.GetComponent<UnityEngine.UI.Text>();
+        text.text = "BAD";
+        hudTs = 1f;
+        HudText.SetActive(true);
+
         Debug.Log("hit " + collision.gameObject.name);
     }
 

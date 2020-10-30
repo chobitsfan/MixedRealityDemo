@@ -4,12 +4,14 @@ using UnityEngine;
 
 public class Hole : MonoBehaviour
 {
-    public GameObject GoodText;
+    public GameObject HudText;
     float ts = 0f;
 
     private void OnTriggerEnter(Collider other)
     {
-        GoodText.SetActive(true);
+        UnityEngine.UI.Text text = HudText.GetComponent<UnityEngine.UI.Text>();
+        text.text = "GOOD";
+        HudText.SetActive(true);
         ts = 1f;
     }
 
@@ -20,7 +22,7 @@ public class Hole : MonoBehaviour
             ts -= Time.deltaTime;
             if (ts <= 0)
             {
-                GoodText.SetActive(false);
+                HudText.SetActive(false);
             }
         }
     }

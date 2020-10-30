@@ -520,9 +520,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9e279456fdb27d74bad90e46d0b8f645, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  MAVLinkPort: 27500
+  MAVLinkPort: 17500
   Bullet: {fileID: 1627521441993660, guid: 12ea0a574b594264685afffd52fff036, type: 3}
   MsgUI: {fileID: 1859458995}
+  HudText: {fileID: 1465647225}
 --- !u!1 &288777414 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 1591110490357510, guid: d4af3966dba2cd746ab019083640eb8c,
@@ -730,7 +731,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e51718941f80bfe48be04a908a917932, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  GoodText: {fileID: 1465647225}
+  HudText: {fileID: 1465647225}
 --- !u!135 &639939515
 SphereCollider:
   m_ObjectHideFlags: 0
@@ -1126,7 +1127,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e51718941f80bfe48be04a908a917932, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  GoodText: {fileID: 1465647225}
+  HudText: {fileID: 1465647225}
 --- !u!135 &1212025325
 SphereCollider:
   m_ObjectHideFlags: 0
@@ -1380,7 +1381,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e51718941f80bfe48be04a908a917932, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  GoodText: {fileID: 1465647225}
+  HudText: {fileID: 1465647225}
 --- !u!1 &1465647225
 GameObject:
   m_ObjectHideFlags: 0
@@ -1393,7 +1394,7 @@ GameObject:
   - component: {fileID: 1465647228}
   - component: {fileID: 1465647227}
   m_Layer: 5
-  m_Name: Good
+  m_Name: HudText
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1416,7 +1417,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 160, y: 30}
+  m_SizeDelta: {x: 160, y: 40}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1465647227
 MonoBehaviour:
@@ -1431,7 +1432,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.19607843, g: 0.19607843, b: 0.19607843, a: 1}
+  m_Color: {r: 1, g: 0.9863347, b: 0, a: 1}
   m_RaycastTarget: 1
   m_Maskable: 1
   m_OnCullStateChanged:
@@ -1439,8 +1440,8 @@ MonoBehaviour:
       m_Calls: []
   m_FontData:
     m_Font: {fileID: 10102, guid: 0000000000000000e000000000000000, type: 0}
-    m_FontSize: 26
-    m_FontStyle: 0
+    m_FontSize: 36
+    m_FontStyle: 3
     m_BestFit: 0
     m_MinSize: 0
     m_MaxSize: 50
@@ -1574,7 +1575,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e51718941f80bfe48be04a908a917932, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  GoodText: {fileID: 1465647225}
+  HudText: {fileID: 1465647225}
 --- !u!135 &1830541537
 SphereCollider:
   m_ObjectHideFlags: 0
