@@ -14,6 +14,7 @@ public class DroneData : MonoBehaviour
     public GameObject Bullet;
     public GameObject MsgUI;
     public GameObject HudText;
+    public GameObject ApmMsg;
     Thread thread;
     bool gogo = true;
     bool gotPos = false;
@@ -36,6 +37,7 @@ public class DroneData : MonoBehaviour
     Text msgText;
     byte avoidAngle = 0;
     float hudTs = 0f;
+    string apmMsg = null;
 
     IPEndPoint sender;
     EndPoint drone;
@@ -69,6 +71,12 @@ public class DroneData : MonoBehaviour
             {
                 HudText.SetActive(false);
             }
+        }
+        if (apmMsg != null)
+        {
+            UnityEngine.UI.Text txt = ApmMsg.GetComponent<UnityEngine.UI.Text>();
+            txt.text = apmMsg;
+            apmMsg = null;
         }
     }
 
@@ -129,8 +137,7 @@ public class DroneData : MonoBehaviour
         text.text = "BAD";
         hudTs = 1f;
         HudText.SetActive(true);
-
-        Debug.Log("hit " + collision.gameObject.name);
+        //Debug.Log("hit " + collision.gameObject.name);
     }
 
     private void OnCollisionStay(Collision collision)
@@ -231,7 +238,7 @@ public class DroneData : MonoBehaviour
                         {
                             gotPos = true;
                             Debug.Log("local_position_ned received");
-                        }                        
+                        }
                         var data = (MAVLink.mavlink_local_position_ned_t)msg.data;
                         if (data.time_boot_ms > lastPosTs)
                         {
@@ -244,11 +251,11 @@ public class DroneData : MonoBehaviour
                     }
                     else if (msg_type == typeof(MAVLink.mavlink_attitude_quaternion_t))
                     {
-                        if(!gotAtt)
+                        if (!gotAtt)
                         {
                             gotAtt = true;
                             Debug.Log("attitude_quaternion received");
-                        }                        
+                        }
                         var data = (MAVLink.mavlink_attitude_quaternion_t)msg.data;
                         if (data.time_boot_ms > lastAttTs)
                         {
@@ -274,6 +281,11 @@ public class DroneData : MonoBehaviour
                         {
                             shoot = false;
                         }
+                    }
+                    else if (msg_type == typeof(MAVLink.mavlink_statustext_t))
+                    {
+                        var data = (MAVLink.mavlink_statustext_t)msg.data;
+                        apmMsg = System.Text.Encoding.ASCII.GetString(data.text);
                     }
                 }
             }
