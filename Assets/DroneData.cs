@@ -244,9 +244,9 @@ public class DroneData : MonoBehaviour
                         {
                             newPos = true;
                             posInt = data.time_boot_ms - lastPosTs;
-                            lastPosTs = data.time_boot_ms;
-                            pos.Set(-data.x, -data.z, data.y);
-                            vel.Set(-data.vx, -data.vz, data.vy);
+                            lastPosTs = data.time_boot_ms;                            
+                            pos.Set(data.y, -data.z, data.x);
+                            vel.Set(data.vy, -data.vz, data.vx);
                         }
                     }
                     else if (msg_type == typeof(MAVLink.mavlink_attitude_quaternion_t))
@@ -262,7 +262,7 @@ public class DroneData : MonoBehaviour
                             newAtt = true;
                             attInt = data.time_boot_ms - lastAttTs;
                             lastAttTs = data.time_boot_ms;
-                            att.Set(-data.q2, -data.q4, data.q3, -data.q1);
+                            att.Set(data.q3, -data.q4, data.q2, -data.q1);
                         }
                     }
                     else if (msg_type == typeof(MAVLink.mavlink_rc_channels_raw_t))
