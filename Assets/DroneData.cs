@@ -90,17 +90,17 @@ public class DroneData : MonoBehaviour
         if (newPos)
         {
             newPos = false;
-            rb.MovePosition(pos);
+            rb.MovePosition(transform.parent.TransformPoint(pos));
             msgText.text = "pos:" + posInt + " ms";
         }
         else
         {
-            rb.MovePosition(transform.position + new Vector3(vel.x * Time.fixedDeltaTime, vel.y * Time.fixedDeltaTime, vel.z * Time.fixedDeltaTime));
+            rb.MovePosition(transform.position + transform.parent.TransformDirection(vel) * Time.deltaTime);
         }
         if (newAtt)
         {
             newAtt = false;
-            rb.MoveRotation(att);
+            rb.MoveRotation(transform.parent.rotation * att);
             //msgText.text = "att:" + attInt + " ms";
         }
         if (shoot)
@@ -245,7 +245,7 @@ public class DroneData : MonoBehaviour
                             newPos = true;
                             posInt = data.time_boot_ms - lastPosTs;
                             lastPosTs = data.time_boot_ms;                            
-                            pos.Set(data.y, -data.z, data.x);
+                            pos.Set(data.y, -data.z, data.x); //unity z as north, x as east
                             vel.Set(data.vy, -data.vz, data.vx);
                         }
                     }
