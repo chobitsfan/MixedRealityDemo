@@ -15,6 +15,7 @@ public class DroneData : MonoBehaviour
     public GameObject MsgUI;
     public GameObject HudText;
     public GameObject ApmMsg;
+    public GameObject ExplosionEffect;
     Thread thread;
     bool gogo = true;
     bool gotPos = false;
@@ -123,14 +124,15 @@ public class DroneData : MonoBehaviour
 
     private void OnCollisionEnter(Collision collision)
     {
+#if false
         Vector3 impact = collision.gameObject.transform.position - transform.position;
         Debug.DrawRay(transform.position, impact, Color.red, 5, false);
         Vector2 impact2d = new Vector2(impact.x, impact.z);
-        Vector3 heading = -transform.right;
-        Vector2 heading2d = new Vector2(heading.x, heading.z);
+        Vector2 heading2d = new Vector2(transform.forward.x, transform.forward.z);
         float angle = -Vector2.SignedAngle(heading2d, impact2d); //https://forum.unity.com/threads/vector2-signedangle.507058/
         if (angle < 0) angle += 360f;
         avoidAngle = (byte)(angle / 2f);
+#endif
         SendDistSensor(5, avoidAngle);
 
         UnityEngine.UI.Text text = HudText.GetComponent<UnityEngine.UI.Text>();
@@ -138,6 +140,9 @@ public class DroneData : MonoBehaviour
         hudTs = 1f;
         HudText.SetActive(true);
         //Debug.Log("hit " + collision.gameObject.name);
+
+        GameObject exp = GameObject.Instantiate(ExplosionEffect, collision.GetContact(0).point, Quaternion.identity);
+        Destroy(exp, 2);
     }
 
     private void OnCollisionStay(Collision collision)

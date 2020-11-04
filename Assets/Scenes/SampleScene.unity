@@ -525,6 +525,8 @@ MonoBehaviour:
   MsgUI: {fileID: 1859458995}
   HudText: {fileID: 1465647225}
   ApmMsg: {fileID: 1851619491}
+  ExplosionEffect: {fileID: 1329845292236604, guid: 9bba9cf244c53c5439505dfc96fdd11c,
+    type: 3}
 --- !u!1 &288777414 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 1591110490357510, guid: d4af3966dba2cd746ab019083640eb8c,
@@ -948,7 +950,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   mat: {fileID: 2100000, guid: 192a07e774d0a07408057105745eb7bf, type: 2}
   RtspUrl: rtsp://192.168.1.126/v1/
-  ConnectCamera: 1
+  ConnectCamera: 0
 --- !u!20 &963194227
 Camera:
   m_ObjectHideFlags: 0
@@ -1465,7 +1467,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0, g: 0.25344753, b: 1, a: 1}
+  m_Color: {r: 1, g: 0, b: 0, a: 1}
   m_RaycastTarget: 1
   m_Maskable: 1
   m_OnCullStateChanged:
@@ -1473,7 +1475,7 @@ MonoBehaviour:
       m_Calls: []
   m_FontData:
     m_Font: {fileID: 10102, guid: 0000000000000000e000000000000000, type: 0}
-    m_FontSize: 36
+    m_FontSize: 28
     m_FontStyle: 3
     m_BestFit: 0
     m_MinSize: 0
@@ -1484,7 +1486,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: GOOD
+  m_Text: HUD TEXT
 --- !u!222 &1465647228
 CanvasRenderer:
   m_ObjectHideFlags: 0
