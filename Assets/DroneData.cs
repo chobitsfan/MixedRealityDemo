@@ -16,6 +16,7 @@ public class DroneData : MonoBehaviour
     public GameObject HudText;
     public GameObject ApmMsg;
     public GameObject ExplosionEffect;
+    public GameObject FxCamera;
     Thread thread;
     bool gogo = true;
     bool gotPos = false;
@@ -122,6 +123,13 @@ public class DroneData : MonoBehaviour
         sock.Close();
     }
 
+    IEnumerator StopCameraGlitch()
+    {
+        yield return new WaitForSeconds(0.5f);
+        Kino.AnalogGlitch glitch = FxCamera.GetComponent<Kino.AnalogGlitch>();
+        glitch.enabled = false;
+    }
+
     private void OnCollisionEnter(Collision collision)
     {
 #if false
@@ -141,8 +149,11 @@ public class DroneData : MonoBehaviour
         HudText.SetActive(true);
         //Debug.Log("hit " + collision.gameObject.name);
 
-        GameObject exp = GameObject.Instantiate(ExplosionEffect, collision.GetContact(0).point, Quaternion.identity);
-        Destroy(exp, 2);
+        //GameObject exp = GameObject.Instantiate(ExplosionEffect, collision.GetContact(0).point, Quaternion.identity);
+        //Destroy(exp, 2);
+        Kino.AnalogGlitch glitch = FxCamera.GetComponent<Kino.AnalogGlitch>();
+        glitch.enabled = true;
+        StartCoroutine(StopCameraGlitch());
     }
 
     private void OnCollisionStay(Collision collision)

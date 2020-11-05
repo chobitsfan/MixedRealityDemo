@@ -208,6 +208,7 @@ GameObject:
   m_Component:
   - component: {fileID: 65728021}
   - component: {fileID: 65728023}
+  - component: {fileID: 65728022}
   m_Layer: 8
   m_Name: Fx Camera
   m_TagString: Untagged
@@ -229,6 +230,23 @@ Transform:
   m_Father: {fileID: 182863246}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: -24, y: 0, z: 0}
+--- !u!114 &65728022
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 65728020}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 870b9a8f0f82f4f56800cc427bcd1025, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _scanLineJitter: 0.6
+  _verticalJump: 0
+  _horizontalShake: 0
+  _colorDrift: 0
+  _shader: {fileID: 4800000, guid: da33272284ea24f208f36998880990be, type: 3}
 --- !u!20 &65728023
 Camera:
   m_ObjectHideFlags: 0
@@ -527,6 +545,7 @@ MonoBehaviour:
   ApmMsg: {fileID: 1851619491}
   ExplosionEffect: {fileID: 1329845292236604, guid: 9bba9cf244c53c5439505dfc96fdd11c,
     type: 3}
+  FxCamera: {fileID: 65728020}
 --- !u!1 &288777414 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 1591110490357510, guid: d4af3966dba2cd746ab019083640eb8c,

@@ -10,7 +10,7 @@ public class Rings : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.Space))
         {
-            transform.position = Player.transform.position + Player.transform.forward * 6;
+            transform.position = Player.transform.position + Player.transform.forward * 15;
             transform.right = Player.transform.forward;
         }
     }
