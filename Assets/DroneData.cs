@@ -41,6 +41,10 @@ public class DroneData : MonoBehaviour
     byte avoidAngle = 0;
     float hudTs = 0f;
     string apmMsg = null;
+    long lastPosNetTs = 0;
+    long posNetInt = 0;
+    long lastAttNetTs = 0;
+    long attNetInt = 0;
 
     IPEndPoint sender;
     EndPoint drone;
@@ -88,11 +92,14 @@ public class DroneData : MonoBehaviour
 
     private void FixedUpdate()
     {
+        if (newPos || newAtt)
+        {
+            NetworkText.GetComponent<Text>().text = "pos:" + posInt + "ms att:" + attInt + "ms posNet:" + posNetInt + "ms attNet:" + attNetInt + "ms";
+        }
         if (newPos)
         {
             newPos = false;
-            rb.MovePosition(transform.parent.TransformPoint(pos));
-            NetworkText.GetComponent<Text>().text = "pos:" + posInt + " ms";
+            rb.MovePosition(transform.parent.TransformPoint(pos));            
             SpeedText.GetComponent<Text>().text = "vel:" + vel.magnitude + "m/s";
         }
         else
@@ -103,7 +110,7 @@ public class DroneData : MonoBehaviour
         {
             newAtt = false;
             rb.MoveRotation(transform.parent.rotation * att);
-        }
+        }        
 #if RC_SHOOT_BULLET
         if (shoot)
         {
@@ -187,6 +194,8 @@ public class DroneData : MonoBehaviour
     void RecvData()
     {
         byte[] buf = new byte[MAVLink.MAVLINK_MAX_PACKET_LEN];
+        System.Diagnostics.Stopwatch stopWatch = new System.Diagnostics.Stopwatch();
+        stopWatch.Start();
         while (gogo)
         {
             int recvBytes = 0;
@@ -263,7 +272,9 @@ public class DroneData : MonoBehaviour
                         {
                             newPos = true;
                             posInt = data.time_boot_ms - lastPosTs;
-                            lastPosTs = data.time_boot_ms;                            
+                            lastPosTs = data.time_boot_ms;
+                            posNetInt = stopWatch.ElapsedMilliseconds - lastPosNetTs;
+                            lastPosNetTs = stopWatch.ElapsedMilliseconds;
                             pos.Set(data.y, -data.z, data.x); //unity z as north, x as east
                             vel.Set(data.vy, -data.vz, data.vx);
                         }
@@ -281,6 +292,8 @@ public class DroneData : MonoBehaviour
                             newAtt = true;
                             attInt = data.time_boot_ms - lastAttTs;
                             lastAttTs = data.time_boot_ms;
+                            attNetInt = stopWatch.ElapsedMilliseconds - lastAttNetTs;
+                            lastAttNetTs = stopWatch.ElapsedMilliseconds;
                             att.Set(data.q3, -data.q4, data.q2, -data.q1);
                         }
                     }
