@@ -696,8 +696,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9e279456fdb27d74bad90e46d0b8f645, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  MAVLinkPort: 17500
-  NetworkText: {fileID: 508589571}
+  MavlinkIp: 192.168.1.126
+  MavlinkPort: 17500
+  NetworkText: {fileID: 1859458995}
   HudText: {fileID: 1465647225}
   ApmMsg: {fileID: 1851619491}
   FxCamera: {fileID: 65728020}
@@ -2702,7 +2703,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 160, y: 30}
+  m_SizeDelta: {x: 400, y: 30}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1859458997
 MonoBehaviour:

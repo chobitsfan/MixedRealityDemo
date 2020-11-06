@@ -9,7 +9,8 @@ using UnityEngine.UI;
 
 public class DroneData : MonoBehaviour
 {
-    public int MAVLinkPort;
+    public string MavlinkIp;
+    public int MavlinkPort;
     //public GameObject Gun;
 #if RC_SHOOT_BULLET
     public GameObject Bullet;
@@ -46,22 +47,20 @@ public class DroneData : MonoBehaviour
     long lastAttNetTs = 0;
     long attNetInt = 0;
 
-    IPEndPoint sender;
-    EndPoint drone;
+    IPEndPoint drone;
     MAVLink.MavlinkParse mavlinkParse;
     Socket sock;
 
     // Start is called before the first frame update
     void Start()
     {
-        sender = new IPEndPoint(IPAddress.Any, 0);
-        drone = (EndPoint)sender;
+        drone = new IPEndPoint(IPAddress.Parse(MavlinkIp), MavlinkPort);
         mavlinkParse = new MAVLink.MavlinkParse();
         sock = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp)
         {
             ReceiveTimeout = 1000
         };
-        sock.Bind(new IPEndPoint(IPAddress.Any, MAVLinkPort));
+        sock.Bind(new IPEndPoint(IPAddress.Any, 0));
 
         thread = new Thread(new ThreadStart(RecvData));
         thread.Start();
@@ -87,7 +86,7 @@ public class DroneData : MonoBehaviour
 
     private void Reset()
     {
-        MAVLinkPort = 17500;
+        MavlinkPort = 17500;
     }
 
     private void FixedUpdate()
@@ -198,10 +197,14 @@ public class DroneData : MonoBehaviour
         stopWatch.Start();
         while (gogo)
         {
+            if (!gotHb)
+            {
+                sock.SendTo(new byte[16], drone);
+            }
             int recvBytes = 0;
             try
             {
-                recvBytes = sock.ReceiveFrom(buf, ref drone);
+                recvBytes = sock.Receive(buf);
             }
             catch (SocketException)
             {
