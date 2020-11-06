@@ -93,7 +93,8 @@ public class DroneData : MonoBehaviour
         {
             newPos = false;
             rb.MovePosition(transform.parent.TransformPoint(pos));
-            msgText.text = "pos:" + posInt + " ms";
+            //msgText.text = "pos:" + posInt + " ms";
+            msgText.text = "vel:" + vel.magnitude;
         }
         else
         {
