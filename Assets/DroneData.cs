@@ -226,7 +226,7 @@ public class DroneData : MonoBehaviour
                             sock.SendTo(data, drone);
                         }
 #endif
-                        if (!gotPos)
+                        if (!gotPos || posInt > 100)
                         {
                             MAVLink.mavlink_command_long_t msgOut = new MAVLink.mavlink_command_long_t()
                             {
@@ -238,7 +238,7 @@ public class DroneData : MonoBehaviour
                             byte[] data = mavlinkParse.GenerateMAVLinkPacket10(MAVLink.MAVLINK_MSG_ID.COMMAND_LONG, msgOut);
                             sock.SendTo(data, drone);
                         }
-                        if (!gotAtt)
+                        if (!gotAtt || attInt > 100)
                         {
                             MAVLink.mavlink_command_long_t msgOut = new MAVLink.mavlink_command_long_t()
                             {
