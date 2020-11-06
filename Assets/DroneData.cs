@@ -11,12 +11,15 @@ public class DroneData : MonoBehaviour
 {
     public int MAVLinkPort;
     //public GameObject Gun;
+#if RC_SHOOT_BULLET
     public GameObject Bullet;
-    public GameObject MsgUI;
+#endif
+    public GameObject NetworkText;
     public GameObject HudText;
     public GameObject ApmMsg;
-    public GameObject ExplosionEffect;
+    //public GameObject ExplosionEffect;
     public GameObject FxCamera;
+    public GameObject SpeedText;
     Thread thread;
     bool gogo = true;
     bool gotPos = false;
@@ -30,13 +33,11 @@ public class DroneData : MonoBehaviour
     Rigidbody rb;
     bool gotHb = false;
     bool shoot = false;
-    //bool shooting = false;
     float shootingTs = 1f;
     uint lastPosTs = 0;
     uint lastAttTs = 0;
     uint posInt = 0;
     uint attInt = 0;
-    Text msgText;
     byte avoidAngle = 0;
     float hudTs = 0f;
     string apmMsg = null;
@@ -61,7 +62,6 @@ public class DroneData : MonoBehaviour
         thread = new Thread(new ThreadStart(RecvData));
         thread.Start();
         rb = GetComponent<Rigidbody>();
-        msgText = MsgUI.GetComponent<Text>();
     }
 
     private void Update()
@@ -76,8 +76,7 @@ public class DroneData : MonoBehaviour
         }
         if (apmMsg != null)
         {
-            UnityEngine.UI.Text txt = ApmMsg.GetComponent<UnityEngine.UI.Text>();
-            txt.text = apmMsg;
+            ApmMsg.GetComponent<Text>().text = apmMsg;
             apmMsg = null;
         }
     }
@@ -93,8 +92,8 @@ public class DroneData : MonoBehaviour
         {
             newPos = false;
             rb.MovePosition(transform.parent.TransformPoint(pos));
-            //msgText.text = "pos:" + posInt + " ms";
-            msgText.text = "vel:" + vel.magnitude;
+            NetworkText.GetComponent<Text>().text = "pos:" + posInt + " ms";
+            SpeedText.GetComponent<Text>().text = "vel:" + vel.magnitude + "m/s";
         }
         else
         {
@@ -104,8 +103,8 @@ public class DroneData : MonoBehaviour
         {
             newAtt = false;
             rb.MoveRotation(transform.parent.rotation * att);
-            //msgText.text = "att:" + attInt + " ms";
         }
+#if RC_SHOOT_BULLET
         if (shoot)
         {
             shootingTs -= Time.fixedDeltaTime;
@@ -115,6 +114,7 @@ public class DroneData : MonoBehaviour
                 GameObject.Instantiate(Bullet, transform.position - transform.up * 0.1f, Quaternion.LookRotation(-transform.right));
             }
         }
+#endif
     }
 
     void OnDestroy()
@@ -212,6 +212,7 @@ public class DroneData : MonoBehaviour
                             gotHb = true;
                             Debug.Log("heartbeat received");
                         }
+#if RC_SHOOT_BULLET
                         if (!gotRC)
                         {
                             MAVLink.mavlink_command_long_t msgOut = new MAVLink.mavlink_command_long_t()
@@ -224,6 +225,7 @@ public class DroneData : MonoBehaviour
                             byte[] data = mavlinkParse.GenerateMAVLinkPacket10(MAVLink.MAVLINK_MSG_ID.COMMAND_LONG, msgOut);
                             sock.SendTo(data, drone);
                         }
+#endif
                         if (!gotPos)
                         {
                             MAVLink.mavlink_command_long_t msgOut = new MAVLink.mavlink_command_long_t()
