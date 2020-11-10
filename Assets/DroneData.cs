@@ -9,19 +9,20 @@ using UnityEngine.UI;
 
 public class DroneData : MonoBehaviour
 {
-    public string MavlinkIp;
-    public int MavlinkPort;
+    //public string MavlinkIp;
+    //public int MavlinkPort;
     //public GameObject Gun;
 #if RC_SHOOT_BULLET
     public GameObject Bullet;
 #endif
+    public InputField IpInputText;
     public GameObject NetworkText;
     public GameObject HudText;
     public GameObject ApmMsg;
     //public GameObject ExplosionEffect;
     public GameObject FxCamera;
     public GameObject SpeedText;
-    Thread thread;
+    Thread thread = null;
     bool gogo = true;
     bool gotPos = false;
     bool gotAtt = false;
@@ -54,17 +55,16 @@ public class DroneData : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        drone = new IPEndPoint(IPAddress.Parse(MavlinkIp), MavlinkPort);
+        rb = GetComponent<Rigidbody>();
         mavlinkParse = new MAVLink.MavlinkParse();
         sock = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp)
         {
             ReceiveTimeout = 1000
         };
         sock.Bind(new IPEndPoint(IPAddress.Any, 0));
-
+        /*drone = new IPEndPoint(IPAddress.Parse(MavlinkIp), MavlinkPort);
         thread = new Thread(new ThreadStart(RecvData));
-        thread.Start();
-        rb = GetComponent<Rigidbody>();
+        thread.Start();*/        
     }
 
     private void Update()
@@ -84,9 +84,18 @@ public class DroneData : MonoBehaviour
         }
     }
 
-    private void Reset()
+    public void OnConnClicked()
     {
-        MavlinkPort = 17500;
+        if (thread == null && IPAddress.TryParse(IpInputText.text, out IPAddress ip))
+        {
+            drone = new IPEndPoint(ip, 17500);
+            thread = new Thread(new ThreadStart(RecvData));
+            thread.Start();
+        }
+        else
+        {
+            Debug.LogWarning("cannot parse drone ip address");
+        }
     }
 
     private void FixedUpdate()
@@ -125,9 +134,23 @@ public class DroneData : MonoBehaviour
 
     void OnDestroy()
     {
-        gogo = false;        
-        thread.Join();
+        gogo = false;
+        if (thread != null)
+        {
+            thread.Join();
+        }
         sock.Close();
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.gameObject.CompareTag("CheckPoint"))
+        {
+            Text text = HudText.GetComponent<Text>();
+            text.text = "GOOD";
+            hudTs = 1f;
+            HudText.SetActive(true);
+        }
     }
 
     IEnumerator StopCameraGlitch()
@@ -150,7 +173,7 @@ public class DroneData : MonoBehaviour
 #endif
         SendDistSensor(5, avoidAngle);
 
-        UnityEngine.UI.Text text = HudText.GetComponent<UnityEngine.UI.Text>();
+        Text text = HudText.GetComponent<Text>();
         text.text = "BAD";
         hudTs = 1f;
         HudText.SetActive(true);

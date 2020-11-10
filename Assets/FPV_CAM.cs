@@ -22,7 +22,8 @@ public class FPV_CAM : MonoBehaviour
     public static extern int NPlayer_ReadFrame(IntPtr pPlayer, IntPtr buffer, out UInt64 timestamp);
 
     public Material mat;
-    public string RtspUrl;
+    //public string RtspUrl;
+    public UnityEngine.UI.InputField IpInputText;
     public bool ConnectCamera;
 
     Texture2D distortMap;
@@ -40,8 +41,7 @@ public class FPV_CAM : MonoBehaviour
     void Start()
     {
         ptr = IntPtr.Zero;
-        ptr = NPlayer_Init();
-        if (ConnectCamera) NPlayer_Connect(ptr, RtspUrl, 1);
+        ptr = NPlayer_Init();        
         bStart = false;
 #if DISTORT
         double _CX = 639.5;
@@ -111,6 +111,12 @@ public class FPV_CAM : MonoBehaviour
         distortMap.Apply(false);
         mat.SetTexture("_DistortTex", distortMap);
 #endif
+    }
+
+    public void OnConnClicked()
+    {
+        //rtsp://192.168.1.113/v1/
+        if (ConnectCamera) NPlayer_Connect(ptr, "rtsp://" + IpInputText.text + "/v1/", 1);
     }
 
     void OnRenderImage(RenderTexture source, RenderTexture destination)

@@ -6,6 +6,7 @@ TagManager:
   tags:
   - Stage
   - Emery
+  - CheckPoint
   layers:
   - Default
   - TransparentFX
