@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Threading;
 using UnityEngine;
@@ -6,35 +7,47 @@ using UnityEngine;
 public class GameStage : MonoBehaviour
 {
     public GameObject emergency;
-    //public GameObject[] asteroidType = new GameObject[3];
-    //float ts = 0;
-    //bool play = false;
-    // Start is called before the first frame update
-    void Start()
+    public Vector3 Center;
+    public float Radius;
+    public int CheckPointCount;
+    public GameObject CheckPointSign;
+    public GameObject Ring;
+    List<GameObject> stageObjects;
+    private void Start()
     {
+        stageObjects = new List<GameObject>();
+        ResetStage();
     }
-
-    // Update is called once per frame
-    /*void Update()
-    {
-        if (Input.GetKeyDown(KeyCode.Space))
-        {
-            play = !play;
-        }
-        if (play)
-        {
-            ts += Time.deltaTime;
-            if (ts > 0.5)
-            {
-                ts = 0;
-                GameObject asteroid = GameObject.Instantiate(asteroidType[Random.Range(0, 2)], new Vector3(5, Random.Range(0f, 4f), Random.Range(-4f, 4f)), Quaternion.identity);
-                asteroid.GetComponent<Rigidbody>().AddForce(new Vector3(-1, 0, 0) * Random.Range(2f, 5f), ForceMode.VelocityChange);
-            }
-        }
-    }*/
 
     public void Warning(bool warning = true)
     {
         emergency.SetActive(warning);
+    }
+
+    public void ResetStage()
+    {
+        if (stageObjects.Count > 0)
+        {
+            foreach (GameObject obj in stageObjects)
+            {
+                Destroy(obj);
+            }
+            stageObjects.Clear();
+        }
+        float step = 2 * Mathf.PI / CheckPointCount;
+        float rad = 0;
+        for (int i = 0; i < CheckPointCount; i++)
+        {
+            float radius = Radius + UnityEngine.Random.Range(-1f, 1f);
+            Vector3 pos = new Vector3(radius * Mathf.Cos(rad), UnityEngine.Random.Range(-1f, 1f), radius * Mathf.Sin(rad));
+            GameObject checkpoint = GameObject.Instantiate(CheckPointSign, Center + pos, Quaternion.identity);
+            stageObjects.Add(checkpoint);
+            if (i == 4)
+            {
+                GameObject ring = GameObject.Instantiate(Ring, Center + pos, Quaternion.identity);
+                stageObjects.Add(ring);
+            }
+            rad += step;
+        }
     }
 }

@@ -19,6 +19,6 @@ public class CheckPoint : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        gameObject.SetActive(false);
+        Destroy(gameObject, 0.1f);
     }
 }
