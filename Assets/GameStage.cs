@@ -36,13 +36,14 @@ public class GameStage : MonoBehaviour
         }
         float step = 2 * Mathf.PI / CheckPointCount;
         float rad = 0;
+        int ringNum = UnityEngine.Random.Range(0, CheckPointCount);
         for (int i = 0; i < CheckPointCount; i++)
         {
             float radius = Radius + UnityEngine.Random.Range(-1f, 1f);
             Vector3 pos = new Vector3(radius * Mathf.Cos(rad), UnityEngine.Random.Range(-1f, 1f), radius * Mathf.Sin(rad));
             GameObject checkpoint = GameObject.Instantiate(CheckPointSign, Center + pos, Quaternion.identity);
             stageObjects.Add(checkpoint);
-            if (i == 4)
+            if (i == ringNum || i == ringNum - 3 || i == ringNum + 3)
             {
                 GameObject ring = GameObject.Instantiate(Ring, Center + pos, Quaternion.identity);
                 stageObjects.Add(ring);
