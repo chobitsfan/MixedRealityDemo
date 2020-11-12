@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Threading;
 using UnityEngine;
 
@@ -12,10 +13,14 @@ public class GameStage : MonoBehaviour
     public int CheckPointCount;
     public GameObject CheckPointSign;
     public GameObject Ring;
+    public GameObject LapTimeMsg;
     List<GameObject> stageObjects;
+    int CheckPointPassed = 0;
+    Stopwatch stopwatch;
     private void Start()
     {
         stageObjects = new List<GameObject>();
+        stopwatch = new Stopwatch();
         ResetStage();
     }
 
@@ -24,8 +29,27 @@ public class GameStage : MonoBehaviour
         emergency.SetActive(warning);
     }
 
+    public void PassCheckPoint()
+    {
+        CheckPointPassed++;
+        if (CheckPointPassed == 1)
+        {
+            stopwatch.Start();
+        }
+        else if (CheckPointPassed == CheckPointCount)
+        {
+            stopwatch.Stop();
+        }
+    }
+
+    private void Update()
+    {
+        LapTimeMsg.GetComponent<UnityEngine.UI.Text>().text = (stopwatch.ElapsedMilliseconds / 10).ToString("D6");
+    }
+
     public void ResetStage()
     {
+        CheckPointPassed = 0;
         if (stageObjects.Count > 0)
         {
             foreach (GameObject obj in stageObjects)

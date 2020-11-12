@@ -22,6 +22,7 @@ public class DroneData : MonoBehaviour
     //public GameObject ExplosionEffect;
     public GameObject FxCamera;
     public GameObject SpeedText;
+    public GameObject Stage;
     Thread thread = null;
     bool gogo = true;
     bool gotPos = false;
