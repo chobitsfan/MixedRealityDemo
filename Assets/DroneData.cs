@@ -47,6 +47,7 @@ public class DroneData : MonoBehaviour
     long posNetInt = 0;
     long lastAttNetTs = 0;
     long attNetInt = 0;
+    long lastHbLocalTs = 0;
 
     IPEndPoint drone;
     MAVLink.MavlinkParse mavlinkParse;
@@ -96,6 +97,18 @@ public class DroneData : MonoBehaviour
         {
             Debug.LogWarning("cannot parse drone ip address");
         }
+    }
+
+    public void RebootApm()
+    {
+        MAVLink.mavlink_command_long_t msgOut = new MAVLink.mavlink_command_long_t()
+        {
+            target_system = 0,
+            command = (ushort)MAVLink.MAV_CMD.PREFLIGHT_REBOOT_SHUTDOWN,
+            param1 = 1
+        };
+        byte[] data = mavlinkParse.GenerateMAVLinkPacket10(MAVLink.MAVLINK_MSG_ID.COMMAND_LONG, msgOut);
+        sock.SendTo(data, drone);
     }
 
     private void FixedUpdate()
@@ -242,9 +255,20 @@ public class DroneData : MonoBehaviour
                     //Debug.Log("recv "+msg_type);
                     if (msg_type == typeof(MAVLink.mavlink_heartbeat_t))
                     {
-                        if (!gotHb)
+                        if (gotHb)
+                        {
+                            long curTs = stopWatch.ElapsedMilliseconds;
+                            if (curTs - lastHbLocalTs > 4000) //we did not receive hb for some time, apm maybe rebooted
+                            {
+                                gotHb = gotAtt = gotPos = gotRC = false;
+                                lastPosTs = lastAttTs = 0;
+                            }
+                            lastHbLocalTs = curTs;
+                        }
+                        else
                         {
                             gotHb = true;
+                            lastHbLocalTs = stopWatch.ElapsedMilliseconds;
                             Debug.Log("heartbeat received");
                         }
 #if RC_SHOOT_BULLET
@@ -291,6 +315,7 @@ public class DroneData : MonoBehaviour
                         if (!gotPos)
                         {
                             gotPos = true;
+                            lastPosTs = 0;
                             Debug.Log("local_position_ned received");
                         }
                         var data = (MAVLink.mavlink_local_position_ned_t)msg.data;
@@ -310,6 +335,7 @@ public class DroneData : MonoBehaviour
                         if (!gotAtt)
                         {
                             gotAtt = true;
+                            lastAttTs = 0;
                             Debug.Log("attitude_quaternion received");
                         }
                         var data = (MAVLink.mavlink_attitude_quaternion_t)msg.data;
