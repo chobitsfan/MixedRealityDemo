@@ -21,7 +21,6 @@ public class GameStage : MonoBehaviour
     {
         stageObjects = new List<GameObject>();
         stopwatch = new Stopwatch();
-        stopwatch.Start();
         ResetStage();
     }
 
