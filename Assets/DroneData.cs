@@ -160,6 +160,7 @@ public class DroneData : MonoBehaviour
     {
         if (other.gameObject.CompareTag("CheckPoint"))
         {
+            Stage.GetComponent<GameStage>().PassCheckPoint();
             Text text = HudText.GetComponent<Text>();
             text.text = "GOOD";
             hudTs = 1f;
