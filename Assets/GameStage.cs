@@ -21,6 +21,7 @@ public class GameStage : MonoBehaviour
     {
         stageObjects = new List<GameObject>();
         stopwatch = new Stopwatch();
+        stopwatch.Start();
         ResetStage();
     }
 
@@ -44,7 +45,14 @@ public class GameStage : MonoBehaviour
 
     private void Update()
     {
-        LapTimeMsg.GetComponent<UnityEngine.UI.Text>().text = (stopwatch.ElapsedMilliseconds / 10).ToString("D6");
+        long laptime = stopwatch.ElapsedMilliseconds;
+        if (laptime > 0)
+        {
+            long mm = laptime / 60000;
+            long ss = laptime / 1000 % 60;
+            long ms = laptime % 1000;
+            LapTimeMsg.GetComponent<UnityEngine.UI.Text>().text = mm.ToString("D2") + ":" + ss.ToString("D2") + "." + ms.ToString("D3");
+        }
     }
 
     public void ResetStage()
@@ -60,14 +68,13 @@ public class GameStage : MonoBehaviour
         }
         float step = 2 * Mathf.PI / CheckPointCount;
         float rad = 0;
-        int ringNum = UnityEngine.Random.Range(0, CheckPointCount);
         for (int i = 0; i < CheckPointCount; i++)
         {
             float radius = Radius + UnityEngine.Random.Range(-1f, 1f);
             Vector3 pos = new Vector3(radius * Mathf.Cos(rad), UnityEngine.Random.Range(-1f, 1f), radius * Mathf.Sin(rad));
             GameObject checkpoint = GameObject.Instantiate(CheckPointSign, Center + pos, Quaternion.identity);
             stageObjects.Add(checkpoint);
-            if (i == ringNum || i == ringNum - 3 || i == ringNum + 3)
+            if (i == 0 || i == 4 || i == 8)
             {
                 GameObject ring = GameObject.Instantiate(Ring, Center + pos, Quaternion.identity);
                 stageObjects.Add(ring);
