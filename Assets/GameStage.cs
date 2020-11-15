@@ -14,6 +14,8 @@ public class GameStage : MonoBehaviour
     public GameObject CheckPointSign;
     public GameObject Ring;
     public GameObject LapTimeMsg;
+    public GameObject HudText;
+    float hudTs = 0f;
     List<GameObject> stageObjects;
     int CheckPointPassed = 0;
     Stopwatch stopwatch;
@@ -35,10 +37,25 @@ public class GameStage : MonoBehaviour
         if (CheckPointPassed == 1)
         {
             stopwatch.Start();
+            UnityEngine.UI.Text text = HudText.GetComponent<UnityEngine.UI.Text>();
+            text.text = "START";
+            hudTs = 1f;
+            HudText.SetActive(true);
         }
         else if (CheckPointPassed == CheckPointCount)
         {
             stopwatch.Stop();
+            UnityEngine.UI.Text text = HudText.GetComponent<UnityEngine.UI.Text>();
+            text.text = "FINISH";
+            hudTs = 5f;
+            HudText.SetActive(true);
+        }
+        else
+        {
+            UnityEngine.UI.Text text = HudText.GetComponent<UnityEngine.UI.Text>();
+            text.text = "GOOD";
+            hudTs = 1f;
+            HudText.SetActive(true);
         }
     }
 
@@ -51,6 +68,14 @@ public class GameStage : MonoBehaviour
             long ss = laptime / 1000 % 60;
             long ms = laptime % 1000;
             LapTimeMsg.GetComponent<UnityEngine.UI.Text>().text = mm.ToString("D2") + ":" + ss.ToString("D2") + "." + ms.ToString("D3");
+        }
+        if (hudTs > 0)
+        {
+            hudTs -= Time.deltaTime;
+            if (hudTs <= 0)
+            {
+                HudText.SetActive(false);
+            }
         }
     }
 

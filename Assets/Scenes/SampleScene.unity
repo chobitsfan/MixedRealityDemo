@@ -476,7 +476,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   IpInputText: {fileID: 198385819}
   NetworkText: {fileID: 1859458995}
-  HudText: {fileID: 1465647225}
   ApmMsg: {fileID: 1851619491}
   FxCamera: {fileID: 65728020}
   SpeedText: {fileID: 508589571}
@@ -2690,5 +2689,10 @@ PrefabInstance:
       propertyPath: LapTimeMsg
       value: 
       objectReference: {fileID: 2017964480}
+    - target: {fileID: 5108700588383897507, guid: b85702d2b22866e4fb7c9652904e2217,
+        type: 3}
+      propertyPath: HudText
+      value: 
+      objectReference: {fileID: 1465647225}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: b85702d2b22866e4fb7c9652904e2217, type: 3}

@@ -17,7 +17,6 @@ public class DroneData : MonoBehaviour
 #endif
     public InputField IpInputText;
     public GameObject NetworkText;
-    public GameObject HudText;
     public GameObject ApmMsg;
     //public GameObject ExplosionEffect;
     public GameObject FxCamera;
@@ -41,8 +40,7 @@ public class DroneData : MonoBehaviour
     uint lastAttTs = 0;
     uint posInt = 0;
     uint attInt = 0;
-    byte avoidAngle = 0;
-    float hudTs = 0f;
+    byte avoidAngle = 0;    
     string apmMsg = null;
     long lastPosNetTs = 0;
     long posNetInt = 0;
@@ -71,14 +69,6 @@ public class DroneData : MonoBehaviour
 
     private void Update()
     {
-        if (hudTs > 0)
-        {
-            hudTs -= Time.deltaTime;
-            if (hudTs <= 0)
-            {
-                HudText.SetActive(false);
-            }
-        }
         if (apmMsg != null)
         {
             ApmMsg.GetComponent<Text>().text = apmMsg;
@@ -161,10 +151,6 @@ public class DroneData : MonoBehaviour
         if (other.gameObject.CompareTag("CheckPoint"))
         {
             Stage.GetComponent<GameStage>().PassCheckPoint();
-            Text text = HudText.GetComponent<Text>();
-            text.text = "GOOD";
-            hudTs = 1f;
-            HudText.SetActive(true);
         }
     }
 
@@ -188,10 +174,10 @@ public class DroneData : MonoBehaviour
 #endif
         SendDistSensor(5, avoidAngle);
 
-        Text text = HudText.GetComponent<Text>();
-        text.text = "BAD";
-        hudTs = 1f;
-        HudText.SetActive(true);
+        //Text text = HudText.GetComponent<Text>();
+        //text.text = "BAD";
+        //hudTs = 1f;
+        //HudText.SetActive(true);
         //Debug.Log("hit " + collision.gameObject.name);
 
         //GameObject exp = GameObject.Instantiate(ExplosionEffect, collision.GetContact(0).point, Quaternion.identity);
