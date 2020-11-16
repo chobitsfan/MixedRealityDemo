@@ -47,6 +47,7 @@ public class DroneData : MonoBehaviour
     long lastAttNetTs = 0;
     long attNetInt = 0;
     long lastHbLocalTs = 0;
+    float glitchTs = 0;
 
     IPEndPoint drone;
     MAVLink.MavlinkParse mavlinkParse;
@@ -73,6 +74,15 @@ public class DroneData : MonoBehaviour
         {
             ApmMsg.GetComponent<Text>().text = apmMsg;
             apmMsg = null;
+        }
+        if (glitchTs > 0)
+        {
+            glitchTs -= Time.deltaTime;
+            if (glitchTs <= 0)
+            {
+                Kino.AnalogGlitch glitch = FxCamera.GetComponent<Kino.AnalogGlitch>();
+                glitch.enabled = false;
+            }
         }
     }
 
@@ -154,13 +164,6 @@ public class DroneData : MonoBehaviour
         }
     }
 
-    IEnumerator StopCameraGlitch()
-    {
-        yield return new WaitForSeconds(0.5f);
-        Kino.AnalogGlitch glitch = FxCamera.GetComponent<Kino.AnalogGlitch>();
-        glitch.enabled = false;
-    }
-
     private void OnCollisionEnter(Collision collision)
     {
 #if false
@@ -184,7 +187,7 @@ public class DroneData : MonoBehaviour
         //Destroy(exp, 2);
         Kino.AnalogGlitch glitch = FxCamera.GetComponent<Kino.AnalogGlitch>();
         glitch.enabled = true;
-        StartCoroutine(StopCameraGlitch());
+        glitchTs = 0.5f;
     }
 
     private void OnCollisionStay(Collision collision)
