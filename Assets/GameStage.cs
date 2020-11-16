@@ -1,4 +1,6 @@
-﻿using System;
+﻿#define MANDY_TRACK
+
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -24,7 +26,10 @@ public class GameStage : MonoBehaviour
     {
         stageObjects = new List<GameObject>();
         stopwatch = new Stopwatch();
-        //ResetStage();
+#if MANDY_TRACK
+#else
+        ResetStage();
+#endif
     }
 
     public void Warning(bool warning = true)
@@ -34,6 +39,7 @@ public class GameStage : MonoBehaviour
 
     public void PassCheckPoint(string name)
     {
+#if MANDY_TRACK
         if (curStep.Equals(""))
         {
             if (name.Equals("CheckPoint1"))
@@ -102,8 +108,8 @@ public class GameStage : MonoBehaviour
                 curStep = name;
             }
         }
-
-        /*CheckPointPassed++;
+#else
+        CheckPointPassed++;
         if (CheckPointPassed == 1)
         {
             stopwatch.Start();
@@ -126,7 +132,8 @@ public class GameStage : MonoBehaviour
             text.text = "GOOD";
             hudTs = 1f;
             HudText.SetActive(true);
-        }*/
+        }
+#endif
     }
 
     private void Update()
@@ -151,9 +158,11 @@ public class GameStage : MonoBehaviour
 
     public void ResetStage()
     {
+#if MANDY_TRACK
         curStep = "";
         stopwatch.Reset();
-        /*CheckPointPassed = 0;
+#else
+        CheckPointPassed = 0;
         if (stageObjects.Count > 0)
         {
             foreach (GameObject obj in stageObjects)
@@ -176,6 +185,7 @@ public class GameStage : MonoBehaviour
                 stageObjects.Add(ring);
             }
             rad += step;
-        }*/
+        }
+#endif
     }
 }
