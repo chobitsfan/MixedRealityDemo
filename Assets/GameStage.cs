@@ -18,12 +18,13 @@ public class GameStage : MonoBehaviour
     float hudTs = 0f;
     List<GameObject> stageObjects;
     int CheckPointPassed = 0;
+    string curStep = "";
     Stopwatch stopwatch;
     private void Start()
     {
         stageObjects = new List<GameObject>();
         stopwatch = new Stopwatch();
-        ResetStage();
+        //ResetStage();
     }
 
     public void Warning(bool warning = true)
@@ -31,9 +32,78 @@ public class GameStage : MonoBehaviour
         emergency.SetActive(warning);
     }
 
-    public void PassCheckPoint()
+    public void PassCheckPoint(string name)
     {
-        CheckPointPassed++;
+        if (curStep.Equals(""))
+        {
+            if (name.Equals("CheckPoint1"))
+            {
+                stopwatch.Start();
+                UnityEngine.UI.Text text = HudText.GetComponent<UnityEngine.UI.Text>();
+                text.text = "START";
+                hudTs = 1f;
+                HudText.SetActive(true);
+                curStep = name;
+            }
+        }
+        else if (curStep.Equals("CheckPoint1"))
+        {
+            if (name.Equals("CheckPoint2"))
+            {
+                UnityEngine.UI.Text text = HudText.GetComponent<UnityEngine.UI.Text>();
+                text.text = "PASS";
+                hudTs = 1f;
+                HudText.SetActive(true);
+                curStep = name;
+            }
+        }
+        else if (curStep.Equals("CheckPoint2"))
+        {
+            if (name.Equals("CheckPoint3"))
+            {
+                UnityEngine.UI.Text text = HudText.GetComponent<UnityEngine.UI.Text>();
+                text.text = "STAGE 2";
+                hudTs = 1f;
+                HudText.SetActive(true);
+                curStep = name;
+            }
+        }
+        else if (curStep.Equals("CheckPoint3"))
+        {
+            if (name.Equals("CheckPoint4"))
+            {
+                UnityEngine.UI.Text text = HudText.GetComponent<UnityEngine.UI.Text>();
+                text.text = "PASS";
+                hudTs = 1f;
+                HudText.SetActive(true);
+                curStep = name;
+            }
+        }
+        else if (curStep.Equals("CheckPoint4"))
+        {
+            if (name.Equals("CheckPoint5"))
+            {
+                UnityEngine.UI.Text text = HudText.GetComponent<UnityEngine.UI.Text>();
+                text.text = "STAGE 3";
+                hudTs = 1f;
+                HudText.SetActive(true);
+                curStep = name;
+            }
+        }
+        else if (curStep.Equals("CheckPoint5"))
+        {
+            if (name.Equals("CheckPoint6"))
+            {
+                stopwatch.Stop();
+                UnityEngine.UI.Text text = HudText.GetComponent<UnityEngine.UI.Text>();
+                text.text = "FINISH";
+                hudTs = 5f;
+                HudText.SetActive(true);
+                curStep = name;
+            }
+        }
+
+        /*CheckPointPassed++;
         if (CheckPointPassed == 1)
         {
             stopwatch.Start();
@@ -56,7 +126,7 @@ public class GameStage : MonoBehaviour
             text.text = "GOOD";
             hudTs = 1f;
             HudText.SetActive(true);
-        }
+        }*/
     }
 
     private void Update()
@@ -81,7 +151,9 @@ public class GameStage : MonoBehaviour
 
     public void ResetStage()
     {
-        CheckPointPassed = 0;
+        curStep = "";
+        stopwatch.Reset();
+        /*CheckPointPassed = 0;
         if (stageObjects.Count > 0)
         {
             foreach (GameObject obj in stageObjects)
@@ -104,6 +176,6 @@ public class GameStage : MonoBehaviour
                 stageObjects.Add(ring);
             }
             rad += step;
-        }
+        }*/
     }
 }

@@ -160,7 +160,7 @@ public class DroneData : MonoBehaviour
     {
         if (other.gameObject.CompareTag("CheckPoint"))
         {
-            Stage.GetComponent<GameStage>().PassCheckPoint();
+            Stage.GetComponent<GameStage>().PassCheckPoint(other.gameObject.name);
         }
     }
 
