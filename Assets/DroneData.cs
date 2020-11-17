@@ -160,7 +160,31 @@ public class DroneData : MonoBehaviour
     {
         if (other.gameObject.CompareTag("CheckPoint"))
         {
-            Stage.GetComponent<GameStage>().PassCheckPoint(other.gameObject.name);
+            Stage.GetComponent<GameStage>().PassCheckPoint();
+        }
+        else
+        {
+            SendDistSensor(5, 0);
+            Kino.AnalogGlitch glitch = FxCamera.GetComponent<Kino.AnalogGlitch>();
+            glitch.enabled = true;
+            glitchTs = 0.5f;
+            Stage.GetComponent<GameStage>().HitObstacle();
+        }
+    }
+
+    private void OnTriggerStay(Collider other)
+    {
+        if (other.gameObject.CompareTag("Obstacle"))
+        {
+            SendDistSensor(5, 0);
+        }
+    }
+
+    private void OnTriggerExit(Collider other)
+    {
+        if (other.gameObject.CompareTag("Obstacle"))
+        {
+            SendDistSensor(5, 0);
         }
     }
 
@@ -177,14 +201,6 @@ public class DroneData : MonoBehaviour
 #endif
         SendDistSensor(5, avoidAngle);
 
-        //Text text = HudText.GetComponent<Text>();
-        //text.text = "BAD";
-        //hudTs = 1f;
-        //HudText.SetActive(true);
-        //Debug.Log("hit " + collision.gameObject.name);
-
-        //GameObject exp = GameObject.Instantiate(ExplosionEffect, collision.GetContact(0).point, Quaternion.identity);
-        //Destroy(exp, 2);
         Kino.AnalogGlitch glitch = FxCamera.GetComponent<Kino.AnalogGlitch>();
         glitch.enabled = true;
         glitchTs = 0.5f;

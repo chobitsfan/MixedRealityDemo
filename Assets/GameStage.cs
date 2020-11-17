@@ -1,6 +1,4 @@
-﻿#define MANDY_TRACK
-
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -17,19 +15,17 @@ public class GameStage : MonoBehaviour
     public GameObject Ring;
     public GameObject LapTimeMsg;
     public GameObject HudText;
+    public GameObject ScoreText;
     float hudTs = 0f;
-    List<GameObject> stageObjects;
-    int CheckPointPassed = 0;
-    string curStep = "";
     Stopwatch stopwatch;
+    int checkPointLeft;
+    int checkPointCount;
     private void Start()
     {
-        stageObjects = new List<GameObject>();
         stopwatch = new Stopwatch();
-#if MANDY_TRACK
-#else
-        ResetStage();
-#endif
+        var checkPoints = GameObject.FindGameObjectsWithTag("CheckPoint");
+        checkPointCount = checkPoints.Length;
+        checkPointLeft = checkPointCount;
     }
 
     public void Warning(bool warning = true)
@@ -37,103 +33,39 @@ public class GameStage : MonoBehaviour
         emergency.SetActive(warning);
     }
 
-    public void PassCheckPoint(string name)
+    public void PassCheckPoint()
     {
-#if MANDY_TRACK
-        if (curStep.Equals(""))
-        {
-            if (name.Equals("CheckPoint1"))
-            {
-                stopwatch.Start();
-                UnityEngine.UI.Text text = HudText.GetComponent<UnityEngine.UI.Text>();
-                text.text = "START";
-                hudTs = 1f;
-                HudText.SetActive(true);
-                curStep = name;
-            }
-        }
-        else if (curStep.Equals("CheckPoint1"))
-        {
-            if (name.Equals("CheckPoint2"))
-            {
-                UnityEngine.UI.Text text = HudText.GetComponent<UnityEngine.UI.Text>();
-                text.text = "PASS";
-                hudTs = 1f;
-                HudText.SetActive(true);
-                curStep = name;
-            }
-        }
-        else if (curStep.Equals("CheckPoint2"))
-        {
-            if (name.Equals("CheckPoint3"))
-            {
-                UnityEngine.UI.Text text = HudText.GetComponent<UnityEngine.UI.Text>();
-                text.text = "STAGE 2";
-                hudTs = 1f;
-                HudText.SetActive(true);
-                curStep = name;
-            }
-        }
-        else if (curStep.Equals("CheckPoint3"))
-        {
-            if (name.Equals("CheckPoint4"))
-            {
-                UnityEngine.UI.Text text = HudText.GetComponent<UnityEngine.UI.Text>();
-                text.text = "PASS";
-                hudTs = 1f;
-                HudText.SetActive(true);
-                curStep = name;
-            }
-        }
-        else if (curStep.Equals("CheckPoint4"))
-        {
-            if (name.Equals("CheckPoint5"))
-            {
-                UnityEngine.UI.Text text = HudText.GetComponent<UnityEngine.UI.Text>();
-                text.text = "STAGE 3";
-                hudTs = 1f;
-                HudText.SetActive(true);
-                curStep = name;
-            }
-        }
-        else if (curStep.Equals("CheckPoint5"))
-        {
-            if (name.Equals("CheckPoint6"))
-            {
-                stopwatch.Stop();
-                UnityEngine.UI.Text text = HudText.GetComponent<UnityEngine.UI.Text>();
-                text.text = "FINISH";
-                hudTs = 5f;
-                HudText.SetActive(true);
-                curStep = name;
-            }
-        }
-#else
-        CheckPointPassed++;
-        if (CheckPointPassed == 1)
+        if (checkPointLeft == checkPointCount)
         {
             stopwatch.Start();
+            checkPointLeft--;
             UnityEngine.UI.Text text = HudText.GetComponent<UnityEngine.UI.Text>();
             text.text = "START";
             hudTs = 1f;
             HudText.SetActive(true);
         }
-        else if (CheckPointPassed == CheckPointCount)
+        else if (checkPointLeft == 1)
         {
             stopwatch.Stop();
+            checkPointLeft--;
             UnityEngine.UI.Text text = HudText.GetComponent<UnityEngine.UI.Text>();
             text.text = "FINISH";
-            hudTs = 5f;
+            hudTs = 1f;
             HudText.SetActive(true);
         }
         else
         {
+            checkPointLeft--;
             UnityEngine.UI.Text text = HudText.GetComponent<UnityEngine.UI.Text>();
-            text.text = "GOOD";
+            text.text = checkPointLeft + " TO GO";
             hudTs = 1f;
             HudText.SetActive(true);
         }
-#endif
+    }
+
+    public void HitObstacle()
+    {
+
     }
 
     private void Update()
@@ -141,6 +73,7 @@ public class GameStage : MonoBehaviour
         long laptime = stopwatch.ElapsedMilliseconds;
         if (laptime > 0)
         {
+
             long mm = laptime / 60000;
             long ss = laptime / 1000 % 60;
             long ms = laptime % 1000;
@@ -158,34 +91,13 @@ public class GameStage : MonoBehaviour
 
     public void ResetStage()
     {
-#if MANDY_TRACK
-        curStep = "";
+        var checkPoints = GameObject.FindGameObjectsWithTag("CheckPoint");
+        foreach (var checkPoint in checkPoints)
+        {
+            checkPoint.SetActive(true);
+        }
+        checkPointCount = checkPoints.Length;
+        checkPointLeft = checkPointCount;
         stopwatch.Reset();
-#else
-        CheckPointPassed = 0;
-        if (stageObjects.Count > 0)
-        {
-            foreach (GameObject obj in stageObjects)
-            {
-                Destroy(obj);
-            }
-            stageObjects.Clear();
-        }
-        float step = 2 * Mathf.PI / CheckPointCount;
-        float rad = 0;
-        for (int i = 0; i < CheckPointCount; i++)
-        {
-            float radius = Radius + UnityEngine.Random.Range(-1f, 1f);
-            Vector3 pos = new Vector3(radius * Mathf.Cos(rad), UnityEngine.Random.Range(-1f, 1f), radius * Mathf.Sin(rad));
-            GameObject checkpoint = GameObject.Instantiate(CheckPointSign, Center + pos, Quaternion.identity);
-            stageObjects.Add(checkpoint);
-            if (i == 0 || i == 4 || i == 8)
-            {
-                GameObject ring = GameObject.Instantiate(Ring, Center + pos, Quaternion.identity);
-                stageObjects.Add(ring);
-            }
-            rad += step;
-        }
-#endif
     }
 }

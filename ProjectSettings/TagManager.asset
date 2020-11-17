@@ -7,6 +7,7 @@ TagManager:
   - Stage
   - Emery
   - CheckPoint
+  - Obstacle
   layers:
   - Default
   - TransparentFX
