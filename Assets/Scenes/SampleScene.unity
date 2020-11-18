@@ -1311,7 +1311,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   mat: {fileID: 2100000, guid: 192a07e774d0a07408057105745eb7bf, type: 2}
   IpInputText: {fileID: 198385819}
-  ConnectCamera: 0
+  ConnectCamera: 1
 --- !u!20 &963194227
 Camera:
   m_ObjectHideFlags: 0
@@ -1392,14 +1392,14 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1060599142}
-  m_LocalRotation: {x: 0, y: -0.3420201, z: 0, w: 0.9396927}
+  m_LocalRotation: {x: 0, y: 0.61566144, z: 0, w: 0.7880108}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 182863246}
   m_Father: {fileID: 0}
   m_RootOrder: 6
-  m_LocalEulerAnglesHint: {x: 0, y: -40, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 76, z: 0}
 --- !u!1001 &1118924067
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1499,7 +1499,7 @@ PrefabInstance:
     - target: {fileID: 5302347131184251246, guid: 2efe5d3dfb143b6499e60f10822da206,
         type: 3}
       propertyPath: m_LocalPosition.z
-      value: 0
+      value: -10
       objectReference: {fileID: 0}
     - target: {fileID: 5302347131184251246, guid: 2efe5d3dfb143b6499e60f10822da206,
         type: 3}
