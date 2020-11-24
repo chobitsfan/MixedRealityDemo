@@ -119,7 +119,7 @@ public class DroneData : MonoBehaviour
         {
             newPos = false;
             rb.MovePosition(transform.parent.TransformPoint(pos));            
-            SpeedText.GetComponent<Text>().text = "vel:" + vel.magnitude + "m/s";
+            SpeedText.GetComponent<Text>().text = "speed: " + vel.magnitude.ToString("F2") + " m/s";
         }
         else
         {
