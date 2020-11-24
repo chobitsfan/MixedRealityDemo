@@ -87,11 +87,16 @@ public class GameStage : MonoBehaviour
                 HudText.SetActive(false);
             }
         }
+        if (Input.GetKeyDown("escape"))
+        {
+            Application.Quit();
+        }
     }
 
     public void ResetStage()
     {
         var checkPoints = GameObject.FindGameObjectsWithTag("CheckPoint");
+        //UnityEngine.Debug.Log(checkPoints.Length);
         foreach (var checkPoint in checkPoints)
         {
             checkPoint.SetActive(true);
