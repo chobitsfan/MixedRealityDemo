@@ -1,9 +1,4 @@
-﻿#define SHOCK_DRONE
-
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Net;
+﻿using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 using UnityEngine;
@@ -220,7 +215,6 @@ public class DroneData : MonoBehaviour
 
     private void SendDistSensor(ushort dist, byte orientation)
     {
-#if SHOCK_DRONE
         if (gotHb)
         {
             MAVLink.mavlink_distance_sensor_t msg = new MAVLink.mavlink_distance_sensor_t
@@ -234,7 +228,6 @@ public class DroneData : MonoBehaviour
             byte[] pkt = mavlinkParse.GenerateMAVLinkPacket10(MAVLink.MAVLINK_MSG_ID.DISTANCE_SENSOR, msg);
             sock.SendTo(pkt, drone);
         }
-#endif
     }
 
     void RecvData()

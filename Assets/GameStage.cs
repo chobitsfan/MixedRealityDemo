@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Threading;
+﻿using System.Diagnostics;
 using UnityEngine;
 
 public class GameStage : MonoBehaviour
@@ -96,7 +92,6 @@ public class GameStage : MonoBehaviour
     public void ResetStage()
     {
         var checkPoints = GameObject.FindGameObjectsWithTag("CheckPoint");
-        //UnityEngine.Debug.Log(checkPoints.Length);
         foreach (var checkPoint in checkPoints)
         {
             checkPoint.SetActive(true);
