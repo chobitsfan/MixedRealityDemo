@@ -115,8 +115,7 @@ public class FPV_CAM : MonoBehaviour
 
     public void OnConnClicked()
     {
-        //rtsp://192.168.1.113/v1/
-        if (ConnectCamera) NPlayer_Connect(ptr, "rtsp://" + IpInputText.text + "/v1/", 1);
+        if (ConnectCamera) NPlayer_Connect(ptr, "rtsp://192.168.50." + IpInputText.text + "/v1/", 1);
     }
 
     void OnRenderImage(RenderTexture source, RenderTexture destination)

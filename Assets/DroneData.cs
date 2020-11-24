@@ -85,7 +85,7 @@ public class DroneData : MonoBehaviour
 
     public void OnConnClicked()
     {
-        if (thread == null && IPAddress.TryParse(IpInputText.text, out IPAddress ip))
+        if (thread == null && IPAddress.TryParse("192.168.50." + IpInputText.text, out IPAddress ip))
         {
             drone = new IPEndPoint(ip, 17500);
             thread = new Thread(new ThreadStart(RecvData));
