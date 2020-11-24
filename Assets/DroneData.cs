@@ -123,7 +123,7 @@ public class DroneData : MonoBehaviour
         }
         else
         {
-            rb.MovePosition(transform.position + transform.parent.TransformDirection(vel) * Time.deltaTime);
+            rb.MovePosition(transform.position + transform.parent.TransformDirection(vel) * Time.fixedDeltaTime);
         }
         if (newAtt)
         {
