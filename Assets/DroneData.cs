@@ -29,7 +29,7 @@ public class DroneData : MonoBehaviour
     Vector3 pos = Vector3.zero;
     Vector3 vel = Vector3.zero;
     Quaternion att = Quaternion.identity;
-    Rigidbody rb;
+    Vector3 angSpeed = Vector3.zero;
     bool gotHb = false;
     bool shoot = false;
     float shootingTs = 1f;
@@ -53,7 +53,6 @@ public class DroneData : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        rb = GetComponent<Rigidbody>();
         mavlinkParse = new MAVLink.MavlinkParse();
         sock = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp)
         {
@@ -80,6 +79,25 @@ public class DroneData : MonoBehaviour
                 Kino.AnalogGlitch glitch = FxCamera.GetComponent<Kino.AnalogGlitch>();
                 glitch.enabled = false;
             }
+        }
+        if (newPos)
+        {
+            newPos = false;
+            transform.localPosition = pos;
+            SpeedText.GetComponent<Text>().text = "speed: " + vel.magnitude.ToString("F2") + " m/s";
+        }
+        else
+        {
+            transform.localPosition += vel * Time.deltaTime;
+        }
+        if (newAtt)
+        {
+            newAtt = false;
+            transform.localRotation = att;
+        }
+        else
+        {
+            transform.Rotate(angSpeed.x * Time.deltaTime / Mathf.PI * 180f, angSpeed.y * Time.deltaTime / Mathf.PI * 180f, angSpeed.z * Time.deltaTime / Mathf.PI * 180f, Space.Self);
         }
     }
 
@@ -111,11 +129,12 @@ public class DroneData : MonoBehaviour
 
     private void FixedUpdate()
     {
+        Rigidbody rb = GetComponent<Rigidbody>();
         if (newPos || newAtt)
         {
             NetworkText.GetComponent<Text>().text = "pos:" + posInt + "ms att:" + attInt + "ms posNet:" + posNetInt + "ms attNet:" + attNetInt + "ms";
         }
-        if (newPos)
+        /*if (newPos)
         {
             newPos = false;
             rb.MovePosition(transform.parent.TransformPoint(pos));            
@@ -129,7 +148,7 @@ public class DroneData : MonoBehaviour
         {
             newAtt = false;
             rb.MoveRotation(transform.parent.rotation * att);
-        }        
+        }*/
 #if RC_SHOOT_BULLET
         if (shoot)
         {
@@ -351,6 +370,7 @@ public class DroneData : MonoBehaviour
                             attNetInt = stopWatch.ElapsedMilliseconds - lastAttNetTs;
                             lastAttNetTs = stopWatch.ElapsedMilliseconds;
                             att.Set(data.q3, -data.q4, data.q2, -data.q1);
+                            angSpeed.Set(data.pitchspeed, data.yawspeed, data.rollspeed);
                         }
                     }
                     else if (msg_type == typeof(MAVLink.mavlink_rc_channels_raw_t))

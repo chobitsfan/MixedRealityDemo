@@ -22,7 +22,6 @@ public class FPV_CAM : MonoBehaviour
     public static extern int NPlayer_ReadFrame(IntPtr pPlayer, IntPtr buffer, out UInt64 timestamp);
 
     public Material mat;
-    //public string RtspUrl;
     public UnityEngine.UI.InputField IpInputText;
     public bool ConnectCamera;
 
