@@ -34,7 +34,7 @@ public class FPV_CAM : MonoBehaviour
     Texture2D texV;
     int w, h;    
     byte[] buffer;
-    protected IntPtr unmanagedBuffer;
+    IntPtr unmanagedBuffer = IntPtr.Zero;
 
     // Start is called before the first frame update
     void Start()
@@ -148,7 +148,7 @@ public class FPV_CAM : MonoBehaviour
 
     void releaseVideoFrameBuffer()
     {
-        if (unmanagedBuffer == IntPtr.Zero)
+        if (unmanagedBuffer != IntPtr.Zero)
             Marshal.FreeHGlobal(unmanagedBuffer);
     }
 
@@ -190,7 +190,7 @@ public class FPV_CAM : MonoBehaviour
         //Debug.Log("VplayerUnityframeReader OnDestroy");
         NPlayer_Uninit(ptr);
         ptr = IntPtr.Zero;
-        if (bStart) releaseVideoFrameBuffer();
+        releaseVideoFrameBuffer();
     }
 
     private void Reset()
