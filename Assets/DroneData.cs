@@ -53,6 +53,7 @@ public class DroneData : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        if (PlayerPrefs.HasKey("DroneIP")) IpInputText.text = PlayerPrefs.GetString("DroneIP");
         mavlinkParse = new MAVLink.MavlinkParse();
         sock = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp)
         {
@@ -105,6 +106,7 @@ public class DroneData : MonoBehaviour
     {
         if (thread == null && IPAddress.TryParse("192.168.50." + IpInputText.text, out IPAddress ip))
         {
+            PlayerPrefs.SetString("DroneIP", IpInputText.text);
             drone = new IPEndPoint(ip, 17500);
             thread = new Thread(new ThreadStart(RecvData));
             thread.Start();
