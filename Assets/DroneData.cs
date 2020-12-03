@@ -34,7 +34,6 @@ public class DroneData : MonoBehaviour
     long posNetInt = 0;
     long lastAttNetTs = 0;
     long attNetInt = 0;
-    long lastHbLocalTs = 0;
     float glitchTs = 0;
 
     IPEndPoint drone;
@@ -124,7 +123,7 @@ public class DroneData : MonoBehaviour
     {
         if (newPos || newAtt)
         {
-            NetworkText.GetComponent<Text>().text = "pos:" + posInt + "ms att:" + attInt + "ms posNet:" + posNetInt + "ms attNet:" + attNetInt + "ms";
+            NetworkText.GetComponent<Text>().text = posInt + " " + attInt + " " + posNetInt + " " + attNetInt;
         }
     }
 
@@ -242,23 +241,18 @@ public class DroneData : MonoBehaviour
                 {
                     System.Type msg_type = msg.data.GetType();
                     //Debug.Log("recv "+msg_type);
+                    long cur_ts = stopWatch.ElapsedMilliseconds;
                     if (msg_type == typeof(MAVLink.mavlink_heartbeat_t))
                     {
-                        if (gotHb)
-                        {
-                            long curTs = stopWatch.ElapsedMilliseconds;
-                            if (curTs - lastHbLocalTs > 4000) //we did not receive hb for some time, apm maybe rebooted
-                            {
-                                gotHb = gotAtt = gotPos = false;
-                                lastPosTs = lastAttTs = 0;
-                            }
-                            lastHbLocalTs = curTs;
-                        }
-                        else
+                        if (!gotHb)
                         {
                             gotHb = true;
-                            lastHbLocalTs = stopWatch.ElapsedMilliseconds;
-                            Debug.Log("heartbeat received");
+                            apmMsg = "heartbeat received";
+                        }
+                        if (gotAtt && (cur_ts - lastAttNetTs > 5000)) //ardupilot may be rebooted
+                        {
+                            gotPos = gotAtt = false;
+                            posInt = attInt = 0;
                         }
                         if (!gotPos || posInt > 100)
                         {
@@ -271,6 +265,7 @@ public class DroneData : MonoBehaviour
                             };
                             byte[] data = mavlinkParse.GenerateMAVLinkPacket10(MAVLink.MAVLINK_MSG_ID.COMMAND_LONG, msgOut);
                             sock.SendTo(data, drone);
+                            //Debug.Log("request LOCAL_POSITION_NED");
                         }
                         if (!gotAtt || attInt > 100)
                         {
@@ -283,6 +278,7 @@ public class DroneData : MonoBehaviour
                             };
                             byte[] data = mavlinkParse.GenerateMAVLinkPacket10(MAVLink.MAVLINK_MSG_ID.COMMAND_LONG, msgOut);
                             sock.SendTo(data, drone);
+                            //Debug.Log("request ATTITUDE_QUATERNION");
                         }
                     }
                     else if (msg_type == typeof(MAVLink.mavlink_local_position_ned_t))
@@ -291,7 +287,7 @@ public class DroneData : MonoBehaviour
                         {
                             gotPos = true;
                             lastPosTs = 0;
-                            Debug.Log("local_position_ned received");
+                            apmMsg = "local_position_ned received";
                         }
                         var data = (MAVLink.mavlink_local_position_ned_t)msg.data;
                         if (data.time_boot_ms > lastPosTs)
@@ -299,8 +295,8 @@ public class DroneData : MonoBehaviour
                             newPos = true;
                             posInt = data.time_boot_ms - lastPosTs;
                             lastPosTs = data.time_boot_ms;
-                            posNetInt = stopWatch.ElapsedMilliseconds - lastPosNetTs;
-                            lastPosNetTs = stopWatch.ElapsedMilliseconds;
+                            posNetInt = cur_ts - lastPosNetTs;
+                            lastPosNetTs = cur_ts;
                             pos.Set(data.y, -data.z, data.x); //unity z as north, x as east
                             vel.Set(data.vy, -data.vz, data.vx);
                         }
@@ -311,7 +307,7 @@ public class DroneData : MonoBehaviour
                         {
                             gotAtt = true;
                             lastAttTs = 0;
-                            Debug.Log("attitude_quaternion received");
+                            apmMsg = "attitude_quaternion received";
                         }
                         var data = (MAVLink.mavlink_attitude_quaternion_t)msg.data;
                         if (data.time_boot_ms > lastAttTs)
@@ -319,8 +315,8 @@ public class DroneData : MonoBehaviour
                             newAtt = true;
                             attInt = data.time_boot_ms - lastAttTs;
                             lastAttTs = data.time_boot_ms;
-                            attNetInt = stopWatch.ElapsedMilliseconds - lastAttNetTs;
-                            lastAttNetTs = stopWatch.ElapsedMilliseconds;
+                            attNetInt = cur_ts - lastAttNetTs;
+                            lastAttNetTs = cur_ts;
                             att.Set(data.q3, -data.q4, data.q2, -data.q1);
                             angSpeed.Set(data.pitchspeed, data.yawspeed, data.rollspeed);
                         }
