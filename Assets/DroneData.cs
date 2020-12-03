@@ -6,12 +6,6 @@ using UnityEngine.UI;
 
 public class DroneData : MonoBehaviour
 {
-    //public string MavlinkIp;
-    //public int MavlinkPort;
-    //public GameObject Gun;
-#if RC_SHOOT_BULLET
-    public GameObject Bullet;
-#endif
     public InputField IpInputText;
     public GameObject NetworkText;
     public GameObject ApmMsg;
@@ -23,7 +17,6 @@ public class DroneData : MonoBehaviour
     bool gogo = true;
     bool gotPos = false;
     bool gotAtt = false;
-    bool gotRC = false;
     bool newPos = false;
     bool newAtt = false;
     Vector3 pos = Vector3.zero;
@@ -31,8 +24,6 @@ public class DroneData : MonoBehaviour
     Quaternion att = Quaternion.identity;
     Vector3 angSpeed = Vector3.zero;
     bool gotHb = false;
-    bool shoot = false;
-    float shootingTs = 1f;
     uint lastPosTs = 0;
     uint lastAttTs = 0;
     uint posInt = 0;
@@ -131,37 +122,10 @@ public class DroneData : MonoBehaviour
 
     private void FixedUpdate()
     {
-        Rigidbody rb = GetComponent<Rigidbody>();
         if (newPos || newAtt)
         {
             NetworkText.GetComponent<Text>().text = "pos:" + posInt + "ms att:" + attInt + "ms posNet:" + posNetInt + "ms attNet:" + attNetInt + "ms";
         }
-        /*if (newPos)
-        {
-            newPos = false;
-            rb.MovePosition(transform.parent.TransformPoint(pos));            
-            SpeedText.GetComponent<Text>().text = "speed: " + vel.magnitude.ToString("F2") + " m/s";
-        }
-        else
-        {
-            rb.MovePosition(transform.position + transform.parent.TransformDirection(vel) * Time.fixedDeltaTime);
-        }
-        if (newAtt)
-        {
-            newAtt = false;
-            rb.MoveRotation(transform.parent.rotation * att);
-        }*/
-#if RC_SHOOT_BULLET
-        if (shoot)
-        {
-            shootingTs -= Time.fixedDeltaTime;
-            if (shootingTs < 0)
-            {
-                shootingTs = 1f;
-                GameObject.Instantiate(Bullet, transform.position - transform.up * 0.1f, Quaternion.LookRotation(-transform.right));
-            }
-        }
-#endif
     }
 
     void OnDestroy()
@@ -285,7 +249,7 @@ public class DroneData : MonoBehaviour
                             long curTs = stopWatch.ElapsedMilliseconds;
                             if (curTs - lastHbLocalTs > 4000) //we did not receive hb for some time, apm maybe rebooted
                             {
-                                gotHb = gotAtt = gotPos = gotRC = false;
+                                gotHb = gotAtt = gotPos = false;
                                 lastPosTs = lastAttTs = 0;
                             }
                             lastHbLocalTs = curTs;
@@ -296,20 +260,6 @@ public class DroneData : MonoBehaviour
                             lastHbLocalTs = stopWatch.ElapsedMilliseconds;
                             Debug.Log("heartbeat received");
                         }
-#if RC_SHOOT_BULLET
-                        if (!gotRC)
-                        {
-                            MAVLink.mavlink_command_long_t msgOut = new MAVLink.mavlink_command_long_t()
-                            {
-                                target_system = 0,
-                                command = (ushort)MAVLink.MAV_CMD.SET_MESSAGE_INTERVAL,
-                                param1 = (float)MAVLink.MAVLINK_MSG_ID.RC_CHANNELS_RAW,
-                                param2 = 20000
-                            };
-                            byte[] data = mavlinkParse.GenerateMAVLinkPacket10(MAVLink.MAVLINK_MSG_ID.COMMAND_LONG, msgOut);
-                            sock.SendTo(data, drone);
-                        }
-#endif
                         if (!gotPos || posInt > 100)
                         {
                             MAVLink.mavlink_command_long_t msgOut = new MAVLink.mavlink_command_long_t()
@@ -373,23 +323,6 @@ public class DroneData : MonoBehaviour
                             lastAttNetTs = stopWatch.ElapsedMilliseconds;
                             att.Set(data.q3, -data.q4, data.q2, -data.q1);
                             angSpeed.Set(data.pitchspeed, data.yawspeed, data.rollspeed);
-                        }
-                    }
-                    else if (msg_type == typeof(MAVLink.mavlink_rc_channels_raw_t))
-                    {
-                        if (!gotRC)
-                        {
-                            gotRC = true;
-                            Debug.Log("rc_channels_raw received");
-                        }
-                        var data = (MAVLink.mavlink_rc_channels_raw_t)msg.data;
-                        if (data.chan6_raw > 1600)
-                        {
-                            shoot = true;
-                        }
-                        else
-                        {
-                            shoot = false;
                         }
                     }
                     else if (msg_type == typeof(MAVLink.mavlink_statustext_t))
