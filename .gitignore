@@ -75,3 +75,4 @@ crashlytics-build.properties
 /DecoderCore_log.txt
 /TimerLog_\[?\].txt
 /TimerLog_\[??\].txt
+/game_log.txt
