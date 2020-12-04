@@ -16,12 +16,14 @@ public class GameStage : MonoBehaviour
     Stopwatch stopwatch;
     int checkPointLeft;
     int checkPointCount;
+    string appStartTime;
     private void Start()
     {
         stopwatch = new Stopwatch();
         var checkPoints = GameObject.FindGameObjectsWithTag("CheckPoint");
         checkPointCount = checkPoints.Length;
         checkPointLeft = checkPointCount;
+        appStartTime = System.DateTime.Now.ToString("u");
     }
 
     public void Warning(bool warning = true)
@@ -46,8 +48,12 @@ public class GameStage : MonoBehaviour
             checkPointLeft--;
             UnityEngine.UI.Text text = HudText.GetComponent<UnityEngine.UI.Text>();
             text.text = "FINISH";
-            hudTs = 1f;
+            hudTs = 2f;
             HudText.SetActive(true);
+
+            System.IO.StreamWriter logfile = new System.IO.StreamWriter("game_log.txt", true);
+            logfile.WriteLine(appStartTime + " -> " + stopwatch.ElapsedMilliseconds + " ms");
+            logfile.Close();
         }
         else
         {
