@@ -35,6 +35,7 @@ public class DroneData : MonoBehaviour
     long lastAttNetTs = 0;
     long attNetInt = 0;
     float glitchTs = 0;
+    UnityEngine.UI.Text SpeedText_text;
 
     IPEndPoint drone;
     MAVLink.MavlinkParse mavlinkParse;
@@ -50,9 +51,8 @@ public class DroneData : MonoBehaviour
             ReceiveTimeout = 1000
         };
         sock.Bind(new IPEndPoint(IPAddress.Any, 0));
-        /*drone = new IPEndPoint(IPAddress.Parse(MavlinkIp), MavlinkPort);
-        thread = new Thread(new ThreadStart(RecvData));
-        thread.Start();*/        
+        
+        SpeedText_text = SpeedText.GetComponent<Text>();
     }
 
     private void Update()
@@ -75,7 +75,7 @@ public class DroneData : MonoBehaviour
         {
             newPos = false;
             transform.localPosition = pos;
-            SpeedText.GetComponent<Text>().text = "speed: " + vel.magnitude.ToString("F2") + " m/s";
+            SpeedText_text.text = "speed: " + vel.magnitude.ToString("F2") + " m/s";
         }
         else
         {
