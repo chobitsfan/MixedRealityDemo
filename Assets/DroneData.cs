@@ -30,13 +30,13 @@ public class DroneData : MonoBehaviour
     uint attInt = 0;
     byte avoidAngle = 0;    
     string apmMsg = null;
-    long lastPosNetTs = 0;
-    long lastAttNetTs = 0;
-    long lastHbNetTs = 0;
     float glitchTs = 0;
     bool ok = false;
     UnityEngine.UI.Text SpeedText_text;
     UnityEngine.UI.Text NetworkText_text;
+    long hbElapsedMs = 10000;
+    long attElapsedMs = 10000;
+    long posElapsedMs = 10000;
 
     IPEndPoint drone;
     MAVLink.MavlinkParse mavlinkParse;
@@ -92,20 +92,32 @@ public class DroneData : MonoBehaviour
         {
             transform.Rotate(angSpeed.x * Time.deltaTime / Mathf.PI * 180f, angSpeed.y * Time.deltaTime / Mathf.PI * 180f, angSpeed.z * Time.deltaTime / Mathf.PI * 180f, Space.Self);
         }
-        long cur_ts = stopWatch.ElapsedMilliseconds;
-        if ((cur_ts - lastAttNetTs < 50) && (cur_ts - lastPosNetTs < 50)) {
+        if ((attElapsedMs < 50) && (posElapsedMs < 50)) {
             if (!ok) {
                 ok = true;
                 NetworkText_text.text = "ok";
             }
         } else {
             ok = false;
-            if (cur_ts - lastHbNetTs > 5000) {
+            if (hbElapsedMs > 5000)
+            {
                 NetworkText_text.text = "no heartbeat";
-            } else if (cur_ts - lastAttNetTs > 1000) {
+            }
+            else if (attElapsedMs > 1000)
+            {
                 NetworkText_text.text = "no attitude";
-            } else if (cur_ts - lastPosNetTs > 1000) {
+            }
+            else if (posElapsedMs > 1000)
+            {
                 NetworkText_text.text = "no position";
+            }
+            else if (attElapsedMs > 50)
+            {
+                NetworkText_text.text = "attitude " + attElapsedMs + " ms";
+            }
+            else if (posElapsedMs > 50)
+            {
+                NetworkText_text.text = "position " + posElapsedMs + " ms";
             }
         }
     }
@@ -223,6 +235,9 @@ public class DroneData : MonoBehaviour
 
     void RecvData()
     {
+        long lastPosNetTs = 0;
+        long lastAttNetTs = 0;
+        long lastHbNetTs = 0;
         byte[] buf = new byte[MAVLink.MAVLINK_MAX_PACKET_LEN];
         System.Diagnostics.Stopwatch stopWatch = new System.Diagnostics.Stopwatch();
         stopWatch.Start();
@@ -240,7 +255,11 @@ public class DroneData : MonoBehaviour
             catch (SocketException)
             {
 
-            }            
+            }
+            long cur_ts = stopWatch.ElapsedMilliseconds;
+            hbElapsedMs = cur_ts - lastHbNetTs;
+            attElapsedMs = cur_ts - lastAttNetTs;
+            posElapsedMs = cur_ts - lastPosNetTs;
             if (recvBytes > 0)
             {
                 MAVLink.MAVLinkMessage msg = mavlinkParse.ReadPacket(buf);
@@ -248,7 +267,6 @@ public class DroneData : MonoBehaviour
                 {
                     System.Type msg_type = msg.data.GetType();
                     //Debug.Log("recv "+msg_type);
-                    long cur_ts = stopWatch.ElapsedMilliseconds;
                     if (msg_type == typeof(MAVLink.mavlink_heartbeat_t))
                     {
                         lastHbNetTs = cur_ts;
