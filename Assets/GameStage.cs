@@ -15,15 +15,17 @@ public class GameStage : MonoBehaviour
     float hudTs = 0f;
     Stopwatch stopwatch;
     int checkPointLeft;
-    int checkPointCount;
     string appStartTime;
+    UnityEngine.UI.Text LapTimeMsgText;
+    GameObject[] checkPoints;
+
     private void Start()
     {
         stopwatch = new Stopwatch();
-        var checkPoints = GameObject.FindGameObjectsWithTag("CheckPoint");
-        checkPointCount = checkPoints.Length;
-        checkPointLeft = checkPointCount;
+        checkPoints = GameObject.FindGameObjectsWithTag("CheckPoint");
+        checkPointLeft = checkPoints.Length;
         appStartTime = System.DateTime.Now.ToString("u");
+        LapTimeMsgText = LapTimeMsg.GetComponent<UnityEngine.UI.Text>();
     }
 
     public void Warning(bool warning = true)
@@ -33,7 +35,7 @@ public class GameStage : MonoBehaviour
 
     public void PassCheckPoint()
     {
-        if (checkPointLeft == checkPointCount)
+        if (checkPointLeft == checkPoints.Length)
         {
             stopwatch.Start();
             checkPointLeft--;
@@ -73,14 +75,10 @@ public class GameStage : MonoBehaviour
     private void Update()
     {
         long laptime = stopwatch.ElapsedMilliseconds;
-        if (laptime > 0)
-        {
-
-            long mm = laptime / 60000;
-            long ss = laptime / 1000 % 60;
-            long ms = laptime % 1000;
-            LapTimeMsg.GetComponent<UnityEngine.UI.Text>().text = mm.ToString("D2") + ":" + ss.ToString("D2") + "." + ms.ToString("D3");
-        }
+        long mm = laptime / 60000;
+        long ss = laptime / 1000 % 60;
+        long ms = laptime % 1000;
+        LapTimeMsgText.text = mm.ToString("D2") + ":" + ss.ToString("D2") + "." + ms.ToString("D3");
         if (hudTs > 0)
         {
             hudTs -= Time.deltaTime;
@@ -97,13 +95,11 @@ public class GameStage : MonoBehaviour
 
     public void ResetStage()
     {
-        var checkPoints = GameObject.FindGameObjectsWithTag("CheckPoint");
-        foreach (var checkPoint in checkPoints)
+        foreach (GameObject checkPoint in checkPoints)
         {
             checkPoint.SetActive(true);
         }
-        checkPointCount = checkPoints.Length;
-        checkPointLeft = checkPointCount;
+        checkPointLeft = checkPoints.Length;
         stopwatch.Reset();
     }
 }
