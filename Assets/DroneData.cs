@@ -31,10 +31,12 @@ public class DroneData : MonoBehaviour
     byte avoidAngle = 0;    
     string apmMsg = null;
     long lastPosNetTs = 0;
-    long posNetInt = 0;
     long lastAttNetTs = 0;
-    long attNetInt = 0;
+    long lastHbNetTs = 0;
     float glitchTs = 0;
+    bool ok = false;
+    UnityEngine.UI.Text SpeedText_text;
+    UnityEngine.UI.Text NetworkText_text;
 
     IPEndPoint drone;
     MAVLink.MavlinkParse mavlinkParse;
@@ -50,9 +52,9 @@ public class DroneData : MonoBehaviour
             ReceiveTimeout = 1000
         };
         sock.Bind(new IPEndPoint(IPAddress.Any, 0));
-        /*drone = new IPEndPoint(IPAddress.Parse(MavlinkIp), MavlinkPort);
-        thread = new Thread(new ThreadStart(RecvData));
-        thread.Start();*/        
+        
+        SpeedText_text = SpeedText.GetComponent<Text>();
+        NetworkText_text = NetworkText.GetComponent<Text>();
     }
 
     private void Update()
@@ -75,7 +77,7 @@ public class DroneData : MonoBehaviour
         {
             newPos = false;
             transform.localPosition = pos;
-            SpeedText.GetComponent<Text>().text = "speed: " + vel.magnitude.ToString("F2") + " m/s";
+            SpeedText_text.text = "speed: " + vel.magnitude.ToString("F2") + " m/s";
         }
         else
         {
@@ -89,6 +91,22 @@ public class DroneData : MonoBehaviour
         else
         {
             transform.Rotate(angSpeed.x * Time.deltaTime / Mathf.PI * 180f, angSpeed.y * Time.deltaTime / Mathf.PI * 180f, angSpeed.z * Time.deltaTime / Mathf.PI * 180f, Space.Self);
+        }
+        long cur_ts = stopWatch.ElapsedMilliseconds;
+        if ((cur_ts - lastAttNetTs < 50) && (cur_ts - lastPosNetTs < 50)) {
+            if (!ok) {
+                ok = true;
+                NetworkText_text.text = "ok";
+            }
+        } else {
+            ok = false;
+            if (cur_ts - lastHbNetTs > 5000) {
+                NetworkText_text.text = "no heartbeat";
+            } else if (cur_ts - lastAttNetTs > 1000) {
+                NetworkText_text.text = "no attitude";
+            } else if (cur_ts - lastPosNetTs > 1000) {
+                NetworkText_text.text = "no position";
+            }
         }
     }
 
@@ -117,14 +135,6 @@ public class DroneData : MonoBehaviour
         };
         byte[] data = mavlinkParse.GenerateMAVLinkPacket10(MAVLink.MAVLINK_MSG_ID.COMMAND_LONG, msgOut);
         sock.SendTo(data, drone);
-    }
-
-    private void FixedUpdate()
-    {
-        if (newPos || newAtt)
-        {
-            NetworkText.GetComponent<Text>().text = posInt + " " + attInt + " " + posNetInt + " " + attNetInt;
-        }
     }
 
     void OnDestroy()
@@ -199,19 +209,16 @@ public class DroneData : MonoBehaviour
 
     private void SendDistSensor(ushort dist, byte orientation)
     {
-        if (gotHb)
+        MAVLink.mavlink_distance_sensor_t msg = new MAVLink.mavlink_distance_sensor_t
         {
-            MAVLink.mavlink_distance_sensor_t msg = new MAVLink.mavlink_distance_sensor_t
-            {
-                type = 10, //shock
-                min_distance = 1,
-                max_distance = 300,
-                current_distance = dist,
-                orientation = orientation
-            };
-            byte[] pkt = mavlinkParse.GenerateMAVLinkPacket10(MAVLink.MAVLINK_MSG_ID.DISTANCE_SENSOR, msg);
-            sock.SendTo(pkt, drone);
-        }
+            type = 10, //shock
+            min_distance = 1,
+            max_distance = 300,
+            current_distance = dist,
+            orientation = orientation
+        };
+        byte[] pkt = mavlinkParse.GenerateMAVLinkPacket10(MAVLink.MAVLINK_MSG_ID.DISTANCE_SENSOR, msg);
+        sock.SendTo(pkt, drone);
     }
 
     void RecvData()
@@ -244,6 +251,7 @@ public class DroneData : MonoBehaviour
                     long cur_ts = stopWatch.ElapsedMilliseconds;
                     if (msg_type == typeof(MAVLink.mavlink_heartbeat_t))
                     {
+                        lastHbNetTs = cur_ts;
                         if (!gotHb)
                         {
                             gotHb = true;
@@ -252,7 +260,6 @@ public class DroneData : MonoBehaviour
                         if (gotAtt && (cur_ts - lastAttNetTs > 5000)) //ardupilot may be rebooted
                         {
                             gotPos = gotAtt = false;
-                            posInt = attInt = 0;
                         }
                         if (!gotPos || posInt > 100)
                         {
@@ -295,7 +302,6 @@ public class DroneData : MonoBehaviour
                             newPos = true;
                             posInt = data.time_boot_ms - lastPosTs;
                             lastPosTs = data.time_boot_ms;
-                            posNetInt = cur_ts - lastPosNetTs;
                             lastPosNetTs = cur_ts;
                             pos.Set(data.y, -data.z, data.x); //unity z as north, x as east
                             vel.Set(data.vy, -data.vz, data.vx);
@@ -315,7 +321,6 @@ public class DroneData : MonoBehaviour
                             newAtt = true;
                             attInt = data.time_boot_ms - lastAttTs;
                             lastAttTs = data.time_boot_ms;
-                            attNetInt = cur_ts - lastAttNetTs;
                             lastAttNetTs = cur_ts;
                             att.Set(data.q3, -data.q4, data.q2, -data.q1);
                             angSpeed.Set(data.pitchspeed, data.yawspeed, data.rollspeed);
