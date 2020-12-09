@@ -76,3 +76,5 @@ crashlytics-build.properties
 /TimerLog_\[?\].txt
 /TimerLog_\[??\].txt
 /game_log.txt
+/Assets/Scenes/SampleScene/LightingData.asset
+/Assets/Scenes/SampleScene/ReflectionProbe-0.exr
