@@ -37,6 +37,7 @@ public class DroneData : MonoBehaviour
     long hbElapsedMs = 10000;
     long attElapsedMs = 10000;
     long posElapsedMs = 10000;
+    float debugUpdateTs = 0;
 
     IPEndPoint drone;
     MAVLink.MavlinkParse mavlinkParse;
@@ -99,6 +100,13 @@ public class DroneData : MonoBehaviour
             }
         } else {
             ok = false;
+            debugUpdateTs += Time.deltaTime;
+            if (debugUpdateTs > 0.5f)
+            {
+                debugUpdateTs = 0;
+                NetworkText_text.text = hbElapsedMs + " " + attElapsedMs + " " + posElapsedMs;
+            }
+            /*
             if (hbElapsedMs > 5000)
             {
                 NetworkText_text.text = "no heartbeat";
@@ -119,6 +127,7 @@ public class DroneData : MonoBehaviour
             {
                 NetworkText_text.text = "position " + posElapsedMs + " ms";
             }
+            */
         }
     }
 
@@ -278,6 +287,7 @@ public class DroneData : MonoBehaviour
                         if (gotAtt && (cur_ts - lastAttNetTs > 5000)) //ardupilot may be rebooted
                         {
                             gotPos = gotAtt = false;
+                            lastPosTs = lastAttTs = 0;
                         }
                         if (!gotPos || posInt > 100)
                         {
@@ -290,7 +300,7 @@ public class DroneData : MonoBehaviour
                             };
                             byte[] data = mavlinkParse.GenerateMAVLinkPacket10(MAVLink.MAVLINK_MSG_ID.COMMAND_LONG, msgOut);
                             sock.SendTo(data, drone);
-                            //Debug.Log("request LOCAL_POSITION_NED");
+                            apmMsg = "req pos " + cur_ts;
                         }
                         if (!gotAtt || attInt > 100)
                         {
@@ -303,7 +313,7 @@ public class DroneData : MonoBehaviour
                             };
                             byte[] data = mavlinkParse.GenerateMAVLinkPacket10(MAVLink.MAVLINK_MSG_ID.COMMAND_LONG, msgOut);
                             sock.SendTo(data, drone);
-                            //Debug.Log("request ATTITUDE_QUATERNION");
+                            apmMsg = "req att " + cur_ts;
                         }
                     }
                     else if (msg_type == typeof(MAVLink.mavlink_local_position_ned_t))
