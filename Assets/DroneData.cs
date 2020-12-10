@@ -26,8 +26,6 @@ public class DroneData : MonoBehaviour
     bool gotHb = false;
     uint lastPosTs = 0;
     uint lastAttTs = 0;
-    uint posInt = 0;
-    uint attInt = 0;
     byte avoidAngle = 0;    
     string apmMsg = null;
     float glitchTs = 0;
@@ -287,7 +285,7 @@ public class DroneData : MonoBehaviour
                             gotPos = gotAtt = false;
                             lastPosTs = lastAttTs = 0;
                         }
-                        if (!gotPos || posInt > 100)
+                        if (!gotPos)
                         {
                             MAVLink.mavlink_command_long_t msgOut = new MAVLink.mavlink_command_long_t()
                             {
@@ -300,7 +298,7 @@ public class DroneData : MonoBehaviour
                             sock.SendTo(data, drone);
                             apmMsg = "req pos " + cur_ts;
                         }
-                        if (!gotAtt || attInt > 100)
+                        if (!gotAtt)
                         {
                             MAVLink.mavlink_command_long_t msgOut = new MAVLink.mavlink_command_long_t()
                             {
@@ -325,8 +323,7 @@ public class DroneData : MonoBehaviour
                         var data = (MAVLink.mavlink_local_position_ned_t)msg.data;
                         if (data.time_boot_ms > lastPosTs)
                         {
-                            newPos = true;
-                            posInt = data.time_boot_ms - lastPosTs;
+                            newPos = true;                            
                             lastPosTs = data.time_boot_ms;
                             lastPosNetTs = cur_ts;
                             pos.Set(data.y, -data.z, data.x); //unity z as north, x as east
@@ -345,7 +342,6 @@ public class DroneData : MonoBehaviour
                         if (data.time_boot_ms > lastAttTs)
                         {
                             newAtt = true;
-                            attInt = data.time_boot_ms - lastAttTs;
                             lastAttTs = data.time_boot_ms;
                             lastAttNetTs = cur_ts;
                             att.Set(data.q3, -data.q4, data.q2, -data.q1);
