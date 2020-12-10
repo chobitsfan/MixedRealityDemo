@@ -48,12 +48,6 @@ public class DroneData : MonoBehaviour
     {
         if (PlayerPrefs.HasKey("DroneIP")) IpInputText.text = PlayerPrefs.GetString("DroneIP");
         mavlinkParse = new MAVLink.MavlinkParse();
-        sock = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp)
-        {
-            ReceiveTimeout = 1000
-        };
-        sock.Bind(new IPEndPoint(IPAddress.Any, 0));
-        
         SpeedText_text = SpeedText.GetComponent<Text>();
         NetworkText_text = NetworkText.GetComponent<Text>();
     }
@@ -165,7 +159,6 @@ public class DroneData : MonoBehaviour
         {
             thread.Join();
         }
-        sock.Close();
     }
 
     private void OnTriggerEnter(Collider other)
@@ -250,6 +243,11 @@ public class DroneData : MonoBehaviour
         byte[] buf = new byte[MAVLink.MAVLINK_MAX_PACKET_LEN];
         System.Diagnostics.Stopwatch stopWatch = new System.Diagnostics.Stopwatch();
         stopWatch.Start();
+        sock = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp)
+        {
+            ReceiveTimeout = 1000
+        };
+        sock.Bind(new IPEndPoint(IPAddress.Any, 0));
         while (gogo)
         {
             if (!gotHb)
@@ -362,5 +360,6 @@ public class DroneData : MonoBehaviour
                 }
             }
         }
+        sock.Close();
     }
 }
