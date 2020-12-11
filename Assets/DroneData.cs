@@ -32,9 +32,10 @@ public class DroneData : MonoBehaviour
     bool ok = false;
     UnityEngine.UI.Text SpeedText_text;
     UnityEngine.UI.Text NetworkText_text;
-    long hbElapsedMs = 10000;
-    long attElapsedMs = 10000;
-    long posElapsedMs = 10000;
+    long hbElapsedMs = 1000;
+    long attElapsedMs = 1000;
+    long posElapsedMs = 1000;
+    long netDataElapsedMs = 1000;
     float infoTs = 0;
 
     IPEndPoint drone;
@@ -96,7 +97,7 @@ public class DroneData : MonoBehaviour
             if (infoTs > 0.5f)
             {
                 infoTs = 0;
-                NetworkText_text.text = hbElapsedMs + " " + attElapsedMs + " " + posElapsedMs;
+                NetworkText_text.text = netDataElapsedMs + " " + hbElapsedMs + " " + attElapsedMs + " " + posElapsedMs;
             }
         }
     }
@@ -236,6 +237,7 @@ public class DroneData : MonoBehaviour
             long lastPosNetTs = 0;
             long lastAttNetTs = 0;
             long lastHbNetTs = 0;
+            long lastDataNetTs = 0;
             byte[] buf = new byte[MAVLink.MAVLINK_MAX_PACKET_LEN];
             sock = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp)
             {
@@ -262,8 +264,10 @@ public class DroneData : MonoBehaviour
                 hbElapsedMs = cur_ts - lastHbNetTs;
                 attElapsedMs = cur_ts - lastAttNetTs;
                 posElapsedMs = cur_ts - lastPosNetTs;
+                netDataElapsedMs = cur_ts - lastDataNetTs;
                 if (recvBytes > 0)
                 {
+                    lastDataNetTs = cur_ts;
                     MAVLink.MAVLinkMessage msg = null;
                     try
                     {
