@@ -35,7 +35,7 @@ public class DroneData : MonoBehaviour
     long hbElapsedMs = 10000;
     long attElapsedMs = 10000;
     long posElapsedMs = 10000;
-    float debugUpdateTs = 0;
+    float infoTs = 0;
 
     IPEndPoint drone;
     MAVLink.MavlinkParse mavlinkParse;
@@ -92,34 +92,12 @@ public class DroneData : MonoBehaviour
             }
         } else {
             ok = false;
-            debugUpdateTs += Time.deltaTime;
-            if (debugUpdateTs > 0.5f)
+            infoTs += Time.deltaTime;
+            if (infoTs > 0.5f)
             {
-                debugUpdateTs = 0;
+                infoTs = 0;
                 NetworkText_text.text = hbElapsedMs + " " + attElapsedMs + " " + posElapsedMs;
             }
-            /*
-            if (hbElapsedMs > 5000)
-            {
-                NetworkText_text.text = "no heartbeat";
-            }
-            else if (attElapsedMs > 1000)
-            {
-                NetworkText_text.text = "no attitude";
-            }
-            else if (posElapsedMs > 1000)
-            {
-                NetworkText_text.text = "no position";
-            }
-            else if (attElapsedMs > 50)
-            {
-                NetworkText_text.text = "attitude " + attElapsedMs + " ms";
-            }
-            else if (posElapsedMs > 50)
-            {
-                NetworkText_text.text = "position " + posElapsedMs + " ms";
-            }
-            */
         }
     }
 
@@ -233,129 +211,168 @@ public class DroneData : MonoBehaviour
         sock.SendTo(pkt, drone);
     }
 
+    void SendHeartbeat()
+    {
+        MAVLink.mavlink_heartbeat_t msg = new MAVLink.mavlink_heartbeat_t()
+        {
+            type = (byte)MAVLink.MAV_TYPE.GCS,
+            autopilot = (byte)MAVLink.MAV_AUTOPILOT.INVALID,
+            mavlink_version = MAVLink.MAVLINK_VERSION
+        };
+        byte[] pkt = mavlinkParse.GenerateMAVLinkPacket10(MAVLink.MAVLINK_MSG_ID.HEARTBEAT, msg);
+        sock.SendTo(pkt, drone);
+    }
+
     void RecvData()
     {
-        long lastPosNetTs = 0;
-        long lastAttNetTs = 0;
-        long lastHbNetTs = 0;
-        byte[] buf = new byte[MAVLink.MAVLINK_MAX_PACKET_LEN];
         System.Diagnostics.Stopwatch stopWatch = new System.Diagnostics.Stopwatch();
         stopWatch.Start();
-        sock = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp)
+        bool netRestart;
+        do
         {
-            ReceiveTimeout = 1000
-        };
-        sock.Bind(new IPEndPoint(IPAddress.Any, 0));
-        while (gogo)
-        {
-            if (!gotHb)
+            netRestart = false;
+            int badDataCnt = 0;
+            long hbSentTs = 0;
+            long lastPosNetTs = 0;
+            long lastAttNetTs = 0;
+            long lastHbNetTs = 0;
+            byte[] buf = new byte[MAVLink.MAVLINK_MAX_PACKET_LEN];
+            sock = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp)
             {
-                sock.SendTo(new byte[16], drone);
-            }
-            int recvBytes = 0;
-            try
+                ReceiveTimeout = 1000
+            };
+            sock.Bind(new IPEndPoint(IPAddress.Any, 0));
+            while (gogo)
             {
-                recvBytes = sock.Receive(buf);
-            }
-            catch (SocketException)
-            {
-
-            }
-            long cur_ts = stopWatch.ElapsedMilliseconds;
-            hbElapsedMs = cur_ts - lastHbNetTs;
-            attElapsedMs = cur_ts - lastAttNetTs;
-            posElapsedMs = cur_ts - lastPosNetTs;
-            if (recvBytes > 0)
-            {
-                MAVLink.MAVLinkMessage msg = mavlinkParse.ReadPacket(buf);
-                if (msg != null && msg.data != null)
+                int recvBytes = 0;
+                try
                 {
-                    System.Type msg_type = msg.data.GetType();
-                    //Debug.Log("recv "+msg_type);
-                    if (msg_type == typeof(MAVLink.mavlink_heartbeat_t))
+                    recvBytes = sock.Receive(buf);
+                }
+                catch (SocketException)
+                {
+                    recvBytes = 0;
+                }
+                long cur_ts = stopWatch.ElapsedMilliseconds;
+                if (cur_ts - hbSentTs > 1000)
+                {
+                    hbSentTs = cur_ts;
+                    SendHeartbeat();
+                }
+                hbElapsedMs = cur_ts - lastHbNetTs;
+                attElapsedMs = cur_ts - lastAttNetTs;
+                posElapsedMs = cur_ts - lastPosNetTs;
+                if (recvBytes > 0)
+                {
+                    MAVLink.MAVLinkMessage msg = null;
+                    try
                     {
-                        lastHbNetTs = cur_ts;
-                        if (!gotHb)
+                        msg = mavlinkParse.ReadPacket(buf);
+                    }
+                    catch (System.IO.InvalidDataException)
+                    {
+                        msg = null;
+                    }
+                    if (msg == null || msg.data == null)
+                    {
+                        badDataCnt++;
+                        apmMsg = "bad data";
+                        if (badDataCnt > 5)
                         {
-                            gotHb = true;
-                            apmMsg = "heartbeat received";
+                            netRestart = true;
+                            break;
                         }
-                        if (gotAtt && (cur_ts - lastAttNetTs > 5000)) //ardupilot may be rebooted
+                    }
+                    else
+                    {
+                        uint msgId = msg.msgid;
+                        //System.Type msg_type = msg.data.GetType();
+                        //Debug.Log("recv "+msg_type);
+                        if (msgId == (uint)MAVLink.MAVLINK_MSG_ID.HEARTBEAT)
                         {
-                            gotPos = gotAtt = false;
-                            lastPosTs = lastAttTs = 0;
-                        }
-                        if (!gotPos)
-                        {
-                            MAVLink.mavlink_command_long_t msgOut = new MAVLink.mavlink_command_long_t()
+                            lastHbNetTs = cur_ts;
+                            if (!gotHb)
                             {
-                                target_system = 0,
-                                command = (ushort)MAVLink.MAV_CMD.SET_MESSAGE_INTERVAL,
-                                param1 = (float)MAVLink.MAVLINK_MSG_ID.LOCAL_POSITION_NED,
-                                param2 = 20000
-                            };
-                            byte[] data = mavlinkParse.GenerateMAVLinkPacket10(MAVLink.MAVLINK_MSG_ID.COMMAND_LONG, msgOut);
-                            sock.SendTo(data, drone);
-                            apmMsg = "req pos " + cur_ts;
-                        }
-                        if (!gotAtt)
-                        {
-                            MAVLink.mavlink_command_long_t msgOut = new MAVLink.mavlink_command_long_t()
+                                gotHb = true;
+                                apmMsg = "heartbeat received";
+                            }
+                            if (gotAtt && (cur_ts - lastAttNetTs > 5000)) //ardupilot may be rebooted
                             {
-                                target_system = 0,
-                                command = (ushort)MAVLink.MAV_CMD.SET_MESSAGE_INTERVAL,
-                                param1 = (float)MAVLink.MAVLINK_MSG_ID.ATTITUDE_QUATERNION,
-                                param2 = 20000
-                            };
-                            byte[] data = mavlinkParse.GenerateMAVLinkPacket10(MAVLink.MAVLINK_MSG_ID.COMMAND_LONG, msgOut);
-                            sock.SendTo(data, drone);
-                            apmMsg = "req att " + cur_ts;
+                                gotPos = gotAtt = false;
+                                lastPosTs = lastAttTs = 0;
+                            }
+                            if (!gotPos)
+                            {
+                                MAVLink.mavlink_command_long_t msgOut = new MAVLink.mavlink_command_long_t()
+                                {
+                                    target_system = 0,
+                                    command = (ushort)MAVLink.MAV_CMD.SET_MESSAGE_INTERVAL,
+                                    param1 = (float)MAVLink.MAVLINK_MSG_ID.LOCAL_POSITION_NED,
+                                    param2 = 20000
+                                };
+                                byte[] data = mavlinkParse.GenerateMAVLinkPacket10(MAVLink.MAVLINK_MSG_ID.COMMAND_LONG, msgOut);
+                                sock.SendTo(data, drone);
+                                //apmMsg = "req pos " + cur_ts;
+                            }
+                            if (!gotAtt)
+                            {
+                                MAVLink.mavlink_command_long_t msgOut = new MAVLink.mavlink_command_long_t()
+                                {
+                                    target_system = 0,
+                                    command = (ushort)MAVLink.MAV_CMD.SET_MESSAGE_INTERVAL,
+                                    param1 = (float)MAVLink.MAVLINK_MSG_ID.ATTITUDE_QUATERNION,
+                                    param2 = 20000
+                                };
+                                byte[] data = mavlinkParse.GenerateMAVLinkPacket10(MAVLink.MAVLINK_MSG_ID.COMMAND_LONG, msgOut);
+                                sock.SendTo(data, drone);
+                                //apmMsg = "req att " + cur_ts;
+                            }
                         }
-                    }
-                    else if (msg_type == typeof(MAVLink.mavlink_local_position_ned_t))
-                    {
-                        if (!gotPos)
+                        else if (msgId == (uint)MAVLink.MAVLINK_MSG_ID.LOCAL_POSITION_NED)
                         {
-                            gotPos = true;
-                            lastPosTs = 0;
-                            apmMsg = "local_position_ned received";
+                            if (!gotPos)
+                            {
+                                gotPos = true;
+                                lastPosTs = 0;
+                                apmMsg = "local_position_ned received";
+                            }
+                            var data = (MAVLink.mavlink_local_position_ned_t)msg.data;
+                            if (data.time_boot_ms > lastPosTs)
+                            {
+                                newPos = true;
+                                lastPosTs = data.time_boot_ms;
+                                lastPosNetTs = cur_ts;
+                                pos.Set(data.y, -data.z, data.x); //unity z as north, x as east
+                                vel.Set(data.vy, -data.vz, data.vx);
+                            }
                         }
-                        var data = (MAVLink.mavlink_local_position_ned_t)msg.data;
-                        if (data.time_boot_ms > lastPosTs)
+                        else if (msgId == (uint)MAVLink.MAVLINK_MSG_ID.ATTITUDE_QUATERNION)
                         {
-                            newPos = true;                            
-                            lastPosTs = data.time_boot_ms;
-                            lastPosNetTs = cur_ts;
-                            pos.Set(data.y, -data.z, data.x); //unity z as north, x as east
-                            vel.Set(data.vy, -data.vz, data.vx);
+                            if (!gotAtt)
+                            {
+                                gotAtt = true;
+                                lastAttTs = 0;
+                                apmMsg = "attitude_quaternion received";
+                            }
+                            var data = (MAVLink.mavlink_attitude_quaternion_t)msg.data;
+                            if (data.time_boot_ms > lastAttTs)
+                            {
+                                newAtt = true;
+                                lastAttTs = data.time_boot_ms;
+                                lastAttNetTs = cur_ts;
+                                att.Set(data.q3, -data.q4, data.q2, -data.q1);
+                                angSpeed.Set(data.pitchspeed, data.yawspeed, data.rollspeed);
+                            }
                         }
-                    }
-                    else if (msg_type == typeof(MAVLink.mavlink_attitude_quaternion_t))
-                    {
-                        if (!gotAtt)
+                        else if (msgId == (uint)MAVLink.MAVLINK_MSG_ID.STATUSTEXT)
                         {
-                            gotAtt = true;
-                            lastAttTs = 0;
-                            apmMsg = "attitude_quaternion received";
+                            var data = (MAVLink.mavlink_statustext_t)msg.data;
+                            apmMsg = System.Text.Encoding.ASCII.GetString(data.text);
                         }
-                        var data = (MAVLink.mavlink_attitude_quaternion_t)msg.data;
-                        if (data.time_boot_ms > lastAttTs)
-                        {
-                            newAtt = true;
-                            lastAttTs = data.time_boot_ms;
-                            lastAttNetTs = cur_ts;
-                            att.Set(data.q3, -data.q4, data.q2, -data.q1);
-                            angSpeed.Set(data.pitchspeed, data.yawspeed, data.rollspeed);
-                        }
-                    }
-                    else if (msg_type == typeof(MAVLink.mavlink_statustext_t))
-                    {
-                        var data = (MAVLink.mavlink_statustext_t)msg.data;
-                        apmMsg = System.Text.Encoding.ASCII.GetString(data.text);
                     }
                 }
             }
-        }
-        sock.Close();
+            sock.Close();
+        } while (netRestart);
     }
 }
