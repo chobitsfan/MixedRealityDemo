@@ -37,6 +37,7 @@ public class DroneData : MonoBehaviour
     long posElapsedMs = 1000;
     long netDataElapsedMs = 1000;
     float infoTs = 0;
+    bool netRestart = false;
 
     IPEndPoint drone;
     MAVLink.MavlinkParse mavlinkParse;
@@ -99,6 +100,13 @@ public class DroneData : MonoBehaviour
                 infoTs = 0;
                 NetworkText_text.text = netDataElapsedMs + " " + hbElapsedMs + " " + attElapsedMs + " " + posElapsedMs;
             }
+        }
+        if (Input.GetKeyDown(KeyCode.R))
+        {
+            ok = false;
+            netRestart = true;
+            gogo = true;
+            NetworkText_text.text = "net restart";
         }
     }
 
@@ -228,7 +236,6 @@ public class DroneData : MonoBehaviour
     {
         System.Diagnostics.Stopwatch stopWatch = new System.Diagnostics.Stopwatch();
         stopWatch.Start();
-        bool netRestart;
         do
         {
             netRestart = false;
