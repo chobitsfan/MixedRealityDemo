@@ -38,6 +38,7 @@ public class DroneData : MonoBehaviour
     long netDataElapsedMs = 1000;
     float infoTs = 0;
     bool netRestart = false;
+    Rigidbody rb;
 
     IPEndPoint drone;
     MAVLink.MavlinkParse mavlinkParse;
@@ -50,6 +51,7 @@ public class DroneData : MonoBehaviour
         mavlinkParse = new MAVLink.MavlinkParse();
         SpeedText_text = SpeedText.GetComponent<Text>();
         NetworkText_text = NetworkText.GetComponent<Text>();
+        rb = GetComponent<Rigidbody>();
     }
 
     private void Update()
@@ -68,7 +70,7 @@ public class DroneData : MonoBehaviour
                 glitch.enabled = false;
             }
         }
-        if (newPos)
+        /*if (newPos)
         {
             newPos = false;
             transform.localPosition = pos;
@@ -86,8 +88,8 @@ public class DroneData : MonoBehaviour
         else
         {
             transform.Rotate(angSpeed.x * Time.deltaTime / Mathf.PI * 180f, angSpeed.y * Time.deltaTime / Mathf.PI * 180f, angSpeed.z * Time.deltaTime / Mathf.PI * 180f, Space.Self);
-        }
-        if ((attElapsedMs < 50) && (posElapsedMs < 50)) {
+        }*/
+        if ((attElapsedMs < 30) && (posElapsedMs < 30)) {
             if (!ok) {
                 ok = true;
                 NetworkText_text.text = "ok";
@@ -110,6 +112,20 @@ public class DroneData : MonoBehaviour
         }
     }
 
+    private void FixedUpdate()
+    {
+        if (newPos)
+        {
+            newPos = false;
+            rb.MovePosition(transform.parent.TransformPoint(pos));
+            SpeedText_text.text = "speed: " + vel.magnitude.ToString("F2") + " m/s";
+        }
+        if (newAtt)
+        {
+            newAtt = false;
+            rb.MoveRotation(transform.parent.rotation * att);
+        }
+    }
     public void OnConnClicked()
     {
         if (thread == null && IPAddress.TryParse("192.168.50." + IpInputText.text, out IPAddress ip))
