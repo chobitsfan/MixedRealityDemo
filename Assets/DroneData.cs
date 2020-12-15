@@ -120,6 +120,10 @@ public class DroneData : MonoBehaviour
             rb.MovePosition(transform.parent.TransformPoint(pos));
             SpeedText_text.text = "speed: " + vel.magnitude.ToString("F2") + " m/s";
         }
+        else
+        {
+            rb.MovePosition(transform.position + transform.parent.TransformDirection(vel) * Time.fixedDeltaTime);
+        }
         if (newAtt)
         {
             newAtt = false;
